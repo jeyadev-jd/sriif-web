@@ -7,6 +7,7 @@ import { Check, Plus, Trash2 } from "lucide-react";
 //  - the admin startup detail page (mode "admin": everything, plus admin-only actions),
 //  - the mentor view (mode "mentor": read-only, no financial data).
 import Image from "next/image";
+import Link from "next/link";
 import { useState, type ReactNode } from "react";
 import { DOC_TYPES, SECTORS } from "@/lib/seed";
 import { brand } from "@/lib/site";
@@ -56,7 +57,7 @@ export function ProfileSection({ s, mode }: P) {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-      <Card title="Startup profile" action={<a className="text-sm font-semibold text-brand underline" href={`/print/profile?sid=${s.id}`} target="_blank">Startup Profile PDF</a>}>
+      <Card title="Startup profile" action={<Link className="text-sm font-semibold text-brand underline" href={`/print/profile?sid=${s.id}`} target="_blank">Startup Profile PDF</Link>}>
         {!canEdit && <ReadOnlyNote>Read-only view.</ReadOnlyNote>}
         <fieldset disabled={!canEdit} className="grid gap-4 md:grid-cols-2">
           <Field label="Startup name (as per incorporation)" className="md:col-span-2"><input className="field" {...bind("name")} /></Field>
@@ -313,10 +314,10 @@ export function ProgressSection({ s, mode }: P) {
       <Card title="Quarterly progress reports" action={mode === "startup" && <Button size="sm" onClick={() => setOpen(true)}>+ Submit report</Button>}>
         <Table head={["Period", "Milestones", "Users", "Revenue", "Pilots", "Partners", "Support needed", ""]} rows={[...s.reports].reverse().map((r) => [
           <b key="p">{r.period}</b>, r.milestones, r.users, mode === "mentor" ? "—" : inr(r.revenue), r.pilots, r.partnerships, r.support,
-          <a key="pdf" className="text-xs text-brand underline" href={`/print/quarterly?sid=${s.id}&rid=${r.id}`} target="_blank">PDF</a>,
+          <Link key="pdf" className="text-xs text-brand underline" href={`/print/quarterly?sid=${s.id}&rid=${r.id}`} target="_blank">PDF</Link>,
         ])} />
       </Card>
-      <Card title={`Yearly review ${year}`} action={<a className="text-sm text-brand underline" href={`/print/annual?sid=${s.id}&year=${year}`} target="_blank">Annual Review Summary PDF</a>}>
+      <Card title={`Yearly review ${year}`} action={<Link className="text-sm text-brand underline" href={`/print/annual?sid=${s.id}&year=${year}`} target="_blank">Annual Review Summary PDF</Link>}>
         <div className="grid gap-3 md:grid-cols-2">
           {ANNUAL_DOCS.map((t) => {
             const file = annual?.files.find((x) => x.type === t);
@@ -521,8 +522,8 @@ export function InvoicesSection({ s, mode }: P) {
           return [
             i.no, i.period, fmtDate(i.due), inr(t.total), <Badge key="b">{st}</Badge>,
             <span key="d" className="flex flex-col text-xs">
-              <a className="text-brand underline" href={`/print/invoice?sid=${s.id}&iid=${i.id}`} target="_blank">Invoice PDF</a>
-              {i.status === "Paid" && <a className="text-brand underline" href={`/print/receipt?sid=${s.id}&iid=${i.id}`} target="_blank">Receipt PDF</a>}
+              <Link className="text-brand underline" href={`/print/invoice?sid=${s.id}&iid=${i.id}`} target="_blank">Invoice PDF</Link>
+              {i.status === "Paid" && <Link className="text-brand underline" href={`/print/receipt?sid=${s.id}&iid=${i.id}`} target="_blank">Receipt PDF</Link>}
             </span>,
             <span key="a">
               {mode === "startup" && i.status === "Due" && !i.utr && <Button size="sm" onClick={() => { setPay(i.id); setUtr(""); }}>Pay</Button>}
@@ -621,7 +622,7 @@ export function LettersSection({ s }: { s: Startup }) {
         return (
           <div key={t} className="flex items-start justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4">
             <div><p className="font-semibold">{t}</p><p className="text-xs text-slate-500">{d}</p></div>
-            {locked ? <Badge>Locked</Badge> : <a className="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white" href={href} target="_blank">Open PDF</a>}
+            {locked ? <Badge>Locked</Badge> : <Link className="shrink-0 rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white" href={href} target="_blank">Open PDF</Link>}
           </div>
         );
       })}

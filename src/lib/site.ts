@@ -1,6 +1,11 @@
 // Public website content. Copied from the Flutter prototype (lib/config.dart)
 // and the SRIIF website sheet (SRIIF_website_VR_AT.xlsx, "Home").
 
+/** Base path when hosted under a sub-path (GitHub Pages: /sriif-web). */
+export const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+/** Prefix a file in /public with the base path (next/image and <video> do not add it). */
+export const asset = (p: string) => (BASE && p.startsWith(BASE + "/") ? p : `${BASE}${p}`);
+
 export const brand = {
   name: "SRIIF",
   fullName: "Sri Ramachandra Innovation Incubation Foundation",
@@ -131,7 +136,7 @@ export const programs: Program[] = [
     title: "Pre-Incubation",
     duration: "3 months",
     desc: "Validate your idea with mentors and a small seed grant before you build.",
-    img: "/img/preincubation.jpg",
+    img: `${BASE}/img/preincubation.jpg`,
     stage: "Idea stage",
     bullets: ["Idea validation workshops", "Seed grant support", "Mentor matching"],
   },
@@ -140,7 +145,7 @@ export const programs: Program[] = [
     title: "Resident Incubation",
     duration: "24 months",
     desc: "A seat, mentoring, compliance help and investor access while you build and launch on campus.",
-    img: "/img/incubation.jpg",
+    img: `${BASE}/img/incubation.jpg`,
     stage: "Prototype to revenue",
     bullets: ["Dedicated seat or cabin", "Lab & instrument access", "Legal, IP and GST support", "Investor demo days"],
   },
@@ -149,7 +154,7 @@ export const programs: Program[] = [
     title: "Virtual Incubation",
     duration: "12 months",
     desc: "Mentoring, lab access on demand and the SRIIF network without a permanent seat.",
-    img: "/img/accelaration.jpg",
+    img: `${BASE}/img/accelaration.jpg`,
     stage: "Any stage",
     bullets: ["Mentor sessions", "Pay-per-use labs", "Fundraising prep", "Go-to-market mentors"],
   },
@@ -164,12 +169,12 @@ export const journey = [
 ];
 
 export const facilities = [
-  { title: "Co-working Space", tag: "30 seats", desc: "Desks, cabins and cubicles with internet access.", img: "/img/cowork1.jpg" },
-  { title: "Instrument Facility", tag: "Wet lab", desc: "RT-PCR, -80 °C freezers and tools.", img: "/img/lab.jpg" },
-  { title: "Board Room", tag: "30 people", desc: "Bookable rooms with video-conferencing.", img: "/img/cowork.jpg" },
-  { title: "Hospital access", tag: "On request", desc: "1200-bed tertiary hospital; shared analytical instruments billed by usage.", img: "/img/hospital.jpg" },
-  { title: "Clinical", tag: "Testing lab", desc: "CDSCO-approved clinical trial facility for testing and trials.", img: "/img/clinical.jpg" },
-  { title: "Instrumentation lab", tag: "Shared", desc: "Instrumentation lab and GLP-accredited small animal facility.", img: "/img/instrument.jpg" },
+  { title: "Co-working Space", tag: "30 seats", desc: "Desks, cabins and cubicles with internet access.", img: `${BASE}/img/cowork1.jpg` },
+  { title: "Instrument Facility", tag: "Wet lab", desc: "RT-PCR, -80 °C freezers and tools.", img: `${BASE}/img/lab.jpg` },
+  { title: "Board Room", tag: "30 people", desc: "Bookable rooms with video-conferencing.", img: `${BASE}/img/cowork.jpg` },
+  { title: "Hospital access", tag: "On request", desc: "1200-bed tertiary hospital; shared analytical instruments billed by usage.", img: `${BASE}/img/hospital.jpg` },
+  { title: "Clinical", tag: "Testing lab", desc: "CDSCO-approved clinical trial facility for testing and trials.", img: `${BASE}/img/clinical.jpg` },
+  { title: "Instrumentation lab", tag: "Shared", desc: "Instrumentation lab and GLP-accredited small animal facility.", img: `${BASE}/img/instrument.jpg` },
 ];
 
 export const partners = [
@@ -193,7 +198,7 @@ export const partneredServices = [
 ];
 
 export const team = [
-  { name: "Dr. Vidya Ramkumar", role: "Faculty Incharge", desc: "Leads the incubation centre.", img: "/img/vidya.jpg" },
+  { name: "Dr. Vidya Ramkumar", role: "Faculty Incharge", desc: "Leads the incubation centre.", img: `${BASE}/img/vidya.jpg` },
   { name: "Mr. Ganesh Saravanan", role: "Manager", desc: "Manages the incubation centre.", img: "" },
   { name: "Mr. S. Venkat", role: "Head – Mentor Network", desc: "Connects startups with domain mentors.", img: "" },
   { name: "Ms. P. Harish", role: "Community Lead", desc: "Events, founder meetups and outreach.", img: "" },

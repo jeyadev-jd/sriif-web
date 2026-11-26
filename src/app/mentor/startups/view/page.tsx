@@ -1,15 +1,19 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { AwardsSection, DocumentsSection, MentorshipSection, ProfileSection, ProgressSection } from "@/components/startup-sections";
 import { cx, Empty, PageTitle } from "@/components/ui";
 import { useStore } from "@/lib/store";
 
 const TABS = ["Profile", "Documents", "Awards", "Progress", "Meetings"] as const;
 
-export default function MentorStartup() {
-  const { id } = useParams<{ id: string }>();
+export default function Page() {
+  return <Suspense><MentorStartup /></Suspense>;
+}
+
+function MentorStartup() {
+  const id = useSearchParams().get("id") ?? "";
   const { db, user } = useStore();
   const [tab, setTab] = useState<(typeof TABS)[number]>("Meetings");
   const s = db.startups.find((x) => x.id === id && user && x.mentorIds.includes(user.id));

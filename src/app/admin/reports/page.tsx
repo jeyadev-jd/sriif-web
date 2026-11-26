@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Card, PageTitle, Stat, Table } from "@/components/ui";
 import { inr, useStore } from "@/lib/store";
 
@@ -42,7 +43,7 @@ export default function Reports() {
 
   return (
     <>
-      <PageTitle title="Impact reports" sub="For SRIIF, SRIHER and funders (BIRAC, StartupTN, DST)." action={<div className="flex gap-2"><button onClick={exportCsv} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Export CSV</button><a href="/print/impact" target="_blank" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">Impact report PDF</a></div>} />
+      <PageTitle title="Impact reports" sub="For SRIIF, SRIHER and funders (BIRAC, StartupTN, DST)." action={<div className="flex gap-2"><button onClick={exportCsv} className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold">Export CSV</button><Link href="/print/impact" target="_blank" className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white">Impact report PDF</Link></div>} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Startups (all time)" value={db.startups.length} />
         <Stat label="Total funding" value={inr(total)} />

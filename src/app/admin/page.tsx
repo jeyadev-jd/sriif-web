@@ -38,7 +38,7 @@ export default function AdminHome() {
           <Table head={["Startup", "Invoice", "Due", "Status"]} rows={dues.map(({ s, i }) => [s.name, `${i.no} · ${inr(invoiceTotals(i.lines, brand.gstRate).total)}`, fmtDate(i.due), <Badge key="b">{i.utr ? "Pending" : i.due < today() ? "Overdue" : "Due"}</Badge>])} empty="No dues." />
         </Card>
         <Card title="Missing mandatory documents">
-          <Table head={["Startup", "Missing"]} rows={missingDocs.map((s) => [<Link key="l" className="text-brand underline" href={`/admin/startups/${s.id}?tab=documents`}>{s.name}</Link>, DOC_TYPES.filter((t) => t.mandatory && !s.docs.some((d) => d.type === t.type)).length + " docs"])} empty="All complete." />
+          <Table head={["Startup", "Missing"]} rows={missingDocs.map((s) => [<Link key="l" className="text-brand underline" href={`/admin/startups/view?id=${s.id}&tab=documents`}>{s.name}</Link>, DOC_TYPES.filter((t) => t.mandatory && !s.docs.some((d) => d.type === t.type)).length + " docs"])} empty="All complete." />
         </Card>
       </div>
     </>

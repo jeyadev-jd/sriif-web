@@ -55,7 +55,7 @@ function Onboard({ reqId }: { reqId: string | null }) {
       const r = d.requests.find((x) => x.id === reqId);
       if (r) r.status = "Onboarded";
     }, `Onboarded ${s.name} with ${team.length} member(s)`);
-    router.push(`/admin/startups/${id}`);
+    router.push(`/admin/startups/view?id=${id}`);
   };
 
   return (

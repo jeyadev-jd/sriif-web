@@ -5,14 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
-import { brand, links, nav } from "@/lib/site";
+import { asset, brand, links, nav } from "@/lib/site";
 import { homeFor, useStore } from "@/lib/store";
 import { cx, LinkButton } from "./ui";
 
 export function Logo({ light }: { light?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-3">
-      <Image src="/img/logo.png" alt="SRIIF logo" width={44} height={44} className="rounded-full bg-white" priority />
+      <Image src={asset("/img/logo.png")} alt="SRIIF logo" width={44} height={44} className="rounded-full bg-white" priority />
       <span className="leading-tight">
         <span className={cx("block text-lg font-extrabold tracking-wide", light ? "text-white" : "text-brand")}>{brand.name}</span>
         <span className={cx("hidden text-[11px] sm:block", light ? "text-white/70" : "text-slate-500")}>{brand.fullName}</span>
@@ -124,7 +124,7 @@ export function PageHero({ eyebrow, title, sub, img, children }: { eyebrow?: str
         </div>
         {img && (
           <div className="relative hidden aspect-[4/3] overflow-hidden rounded-2xl border border-slate-200 shadow-xl shadow-brand/10 lg:block">
-            <Image src={img} alt="" fill className="object-cover" sizes="40vw" priority />
+            <Image src={asset(img)} alt="" fill className="object-cover" sizes="40vw" priority />
           </div>
         )}
       </div>

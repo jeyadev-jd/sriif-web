@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button, Field } from "@/components/ui";
@@ -47,7 +48,7 @@ export default function Login() {
           {err && <p className="text-sm text-red-600" role="alert">{err}</p>}
           <Button type="submit">{step === "email" ? "Send OTP" : "Verify & log in"}</Button>
         </form>
-        <p className="mt-6 text-xs text-slate-500">No account? There is no self sign-up. <a className="text-brand underline" href="/apply">Request incubation</a> and SRIIF admin will onboard your team.</p>
+        <p className="mt-6 text-xs text-slate-500">No account? There is no self sign-up. <Link className="text-brand underline" href="/apply">Request incubation</Link> and SRIIF admin will onboard your team.</p>
       </div>
       <div className="rounded-2xl bg-surface p-8">
         <h2 className="font-semibold text-brand-dark">Demo accounts</h2>

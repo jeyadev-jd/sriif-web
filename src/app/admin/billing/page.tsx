@@ -21,7 +21,7 @@ export default function Billing() {
         <Table head={["Startup", "Invoice", "Period", "Due", "Total", "Status", ""]} rows={all.sort((a, b) => b.i.issued.localeCompare(a.i.issued)).map(({ s, i, t }) => [
           s.name, i.no, i.period, fmtDate(i.due), inr(t.total),
           <Badge key="b">{i.status === "Due" ? (i.utr ? "Pending" : i.due < today() ? "Overdue" : "Due") : i.status}</Badge>,
-          <Link key="l" className="text-brand underline" href={`/admin/startups/${s.id}?tab=invoices`}>Open</Link>,
+          <Link key="l" className="text-brand underline" href={`/admin/startups/view?id=${s.id}&tab=invoices`}>Open</Link>,
         ])} />
       </Card>
     </>

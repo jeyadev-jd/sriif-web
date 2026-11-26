@@ -11,7 +11,7 @@ export default function Meetings() {
     <>
       <PageTitle title="Meetings" sub="Confirm requests and record notes from the startup's page." />
       <Card>
-        <Table head={["Date", "Startup", "Agenda", "Status", ""]} rows={rows.map(({ s, m }) => [`${fmtDate(m.date)} ${m.time}`, s.name, m.agenda, <Badge key="b">{m.status}</Badge>, <Link key="l" className="text-brand underline" href={`/mentor/startups/${s.id}`}>Open</Link>])} />
+        <Table head={["Date", "Startup", "Agenda", "Status", ""]} rows={rows.map(({ s, m }) => [`${fmtDate(m.date)} ${m.time}`, s.name, m.agenda, <Badge key="b">{m.status}</Badge>, <Link key="l" className="text-brand underline" href={`/mentor/startups/view?id=${s.id}`}>Open</Link>])} />
       </Card>
     </>
   );

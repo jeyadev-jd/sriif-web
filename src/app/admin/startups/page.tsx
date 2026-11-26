@@ -19,7 +19,7 @@ export default function Startups() {
       </div>
       <Card>
         <Table head={["Startup", "Program", "Cohort", "Stage / TRL", "Team", "Funding", "Onboarded", "Status"]} rows={list.map((s) => [
-          <Link key="l" href={`/admin/startups/${s.id}`} className="font-semibold text-brand underline">{s.name}</Link>,
+          <Link key="l" href={`/admin/startups/view?id=${s.id}`} className="font-semibold text-brand underline">{s.name}</Link>,
           s.program, s.cohort, `${s.stage} · ${s.trl}`, db.users.filter((u) => u.startupId === s.id).length,
           inr(s.funding.filter((f) => f.currency === "INR").reduce((a, f) => a + f.amount, 0)), fmtDate(s.onboardedOn), <Badge key="b">{s.status}</Badge>,
         ])} />

@@ -4,7 +4,7 @@ import { ArrowRight, BadgeCheck, Building2, Calendar, CheckCircle2, FlaskConical
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { about, brand, events, facilities, faqs, heroWords, impact, journey, links, mentors, news, partners, programs, publicStartups, stats, stories, team, why } from "@/lib/site";
+import { about, asset, brand, events, facilities, faqs, heroWords, impact, journey, links, mentors, news, partners, programs, publicStartups, stats, stories, team, why } from "@/lib/site";
 import { Container, SectionHead } from "./site-chrome";
 import { cx, LinkButton } from "./ui";
 
@@ -61,7 +61,7 @@ export function Hero() {
             <span className="ml-3 text-xs text-slate-400">SRIIF · Sri Ramachandra campus, Porur</span>
           </div>
           <div className="relative aspect-[3/4] bg-brand-dark sm:aspect-[16/9] md:aspect-[16/7]">
-            <video className="absolute inset-0 h-full w-full object-cover" src="/img/home.mp4" poster="/img/herohome.jpg" autoPlay muted loop playsInline aria-label="Life at the SRIIF incubation centre" />
+            <video className="absolute inset-0 h-full w-full object-cover" src={asset("/img/home.mp4")} poster={asset("/img/herohome.jpg")} autoPlay muted loop playsInline aria-label="Life at the SRIIF incubation centre" />
             <div className="absolute inset-x-0 bottom-0 grid grid-cols-2 gap-px bg-white/10 backdrop-blur md:grid-cols-4">
               {stats.map((x) => (
                 <div key={x.label} className="bg-brand-dark/80 px-5 py-4 text-left text-white">
@@ -82,7 +82,7 @@ export function AboutBlock() {
     <Container>
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div className="relative">
-          <Image src="/img/sriif1.png" alt="SRIIF incubation centre" width={720} height={520} className="rounded-2xl object-cover shadow-lg" />
+          <Image src={asset("/img/sriif1.png")} alt="SRIIF incubation centre" width={720} height={520} className="rounded-2xl object-cover shadow-lg" />
           <span className="absolute -bottom-4 left-6 rounded-full bg-accent px-4 py-2 text-sm font-bold text-brand-dark shadow">{brand.since}</span>
         </div>
         <div>

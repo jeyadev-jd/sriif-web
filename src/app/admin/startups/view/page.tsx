@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { AwardsSection, CapTableSection, DocumentsSection, FacilitiesSection, FundingSection, InvoicesSection, LettersSection, MentorshipSection, ProfileSection, ProgressSection, TeamSection } from "@/components/startup-sections";
 import { Badge, cx, PageTitle } from "@/components/ui";
@@ -13,8 +13,9 @@ const TABS = [
 ] as const;
 
 function Detail() {
-  const { id } = useParams<{ id: string }>();
-  const tab = useSearchParams().get("tab") ?? "profile";
+  const q = useSearchParams();
+  const id = q.get("id") ?? "";
+  const tab = q.get("tab") ?? "profile";
   const router = useRouter();
   const { db } = useStore();
   const s = db.startups.find((x) => x.id === id);
@@ -24,7 +25,7 @@ function Detail() {
     <>
       <PageTitle title={s.name} sub={`${s.program} · ${s.cohort} · ${s.oneLiner}`} action={<Badge>{s.status}</Badge>} />
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
-        {TABS.map(([k, l]) => <button key={k} onClick={() => router.replace(`/admin/startups/${s.id}?tab=${k}`)} className={cx("whitespace-nowrap border-b-2 px-3 py-2 text-sm", tab === k ? "border-brand font-semibold text-brand" : "border-transparent text-slate-500 hover:text-slate-800")}>{l}</button>)}
+        {TABS.map(([k, l]) => <button key={k} onClick={() => router.replace(`/admin/startups/view?id=${s.id}&tab=${k}`)} className={cx("whitespace-nowrap border-b-2 px-3 py-2 text-sm", tab === k ? "border-brand font-semibold text-brand" : "border-transparent text-slate-500 hover:text-slate-800")}>{l}</button>)}
       </div>
       {tab === "profile" && <ProfileSection key={s.id} {...p} />}
       {tab === "team" && <TeamSection {...p} />}

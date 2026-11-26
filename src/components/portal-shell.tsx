@@ -5,6 +5,7 @@ import {
   LogOut, Megaphone, Menu, PieChart, Receipt, UserPlus, Users, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
+import { asset } from "@/lib/site";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
@@ -79,7 +80,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
       <aside className={cx("no-print fixed inset-y-0 left-0 z-40 flex w-68 flex-col bg-brand-dark transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex items-center justify-between border-b border-white/10 p-4">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/img/logo.png" alt="SRIIF home" width={38} height={38} className="rounded-full bg-white" />
+            <Image src={asset("/img/logo.png")} alt="SRIIF home" width={38} height={38} className="rounded-full bg-white" />
             <span className="text-white"><span className="block font-bold leading-tight">SRIIF</span><span className="text-xs text-white/60">{ROLE_LABEL[role]}</span></span>
           </Link>
           <button className="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:bg-white/10 lg:hidden" aria-label="Close menu" onClick={() => setOpen(false)}><X size={20} aria-hidden /></button>

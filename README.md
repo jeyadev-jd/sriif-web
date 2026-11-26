@@ -19,6 +19,12 @@ Production build:
 npm run build && npm start
 ```
 
+## GitHub Pages
+
+Live demo: https://jeyadev-jd.github.io/sriif-web/
+
+Every push to `main` builds a static export (`GITHUB_PAGES=1 npm run build` → `./out`, served under `/sriif-web`) and deploys it with `.github/workflows/pages.yml`.
+
 ## What is inside
 
 **Public site** – Home, About, Facilities, Funding, Incubation (Resident, Pre-Incubation, Virtual), Services (Mentors, Partnered services, Co-working, Lab & Research), Events, Startups, Contact, Apply for Incubation.
@@ -55,7 +61,7 @@ Reset demo data from **Admin → Audit log → Reset demo data**.
 ```
 src/app/(site)      public website pages
 src/app/portal      startup portal
-src/app/admin       admin console
+src/app/admin       admin console (startup detail: /admin/startups/view?id=…)
 src/app/mentor      mentor workspace
 src/app/print       printable documents (offer letter, agreement, invoice, receipt, reports, certificate)
 src/components      shared UI, portal sections, tickets

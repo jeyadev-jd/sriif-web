@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand: #0b3c6f;
+  --color-brand-dark: #071f3a;
+  --color-brand-50: #eef4fb;
+  /* Calibrated palette: one ink, one brand blue, one muted tint, amber used sparingly.
+     Amber is only for marks, dots, CTAs and text/icons on ink (never text on white: 2:1 contrast). */
+  --color-ink: #071f3a;
+  --color-mist: #d3dde8;
+  --color-accent: #f5a623;
+  --color-surface: #f5f7fa;
+  --font-sans: var(--font-figtree);
+  --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-anton);
+}
+
+body {
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Bold-editorial helpers (public site) */
+.display {
+  font-family: var(--font-anton), Impact, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.005em;
+  line-height: 0.95;
+}
+.grid-paper {
+  background-color: #fff;
+  background-image:
+    linear-gradient(to right, rgb(11 60 111 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(11 60 111 / 0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+/* amber bar behind the lower part of a word */
+.mark {
+  background-image: linear-gradient(transparent 62%, var(--color-accent) 62%, var(--color-accent) 92%, transparent 92%);
+  padding: 0 0.08em;
+}
+.outline-num {
+  -webkit-text-stroke: 1.5px rgb(255 255 255 / 0.35);
+  color: transparent;
+}
+
+/* Accessible focus: visible ring for keyboard users only */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+button:not(:disabled),
+summary,
+label:has(input[type="file"]) {
+  cursor: pointer;
+}
+
+.field {
+  @apply min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm transition-colors outline-none hover:border-slate-400 focus:border-brand focus:ring-2 focus:ring-brand/20;
+}
+.field:read-only:not(select),
+fieldset:disabled .field {
+  @apply cursor-default border-dashed border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-200;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

@@ -9,7 +9,7 @@ export default function Page() {
   if (!s) return null;
   return (
     <>
-      <PageTitle title="Startup profile" sub="Name, TRL, sectors, stage, cohort, addresses and contact." />
+      <PageTitle title="Profile & pitch deck" sub="Brand assets, pitch deck, company details and GSTIN." />
       <ProfileSection s={s} mode="startup" />
     </>
   );

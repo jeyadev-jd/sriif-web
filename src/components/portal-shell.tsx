@@ -2,7 +2,7 @@
 
 import {
   Award, Building2, CalendarDays, ChartColumn, ClipboardCheck, Coins, DoorOpen, FileText, FolderLock, History, House, Inbox, LifeBuoy,
-  LogOut, Megaphone, Menu, PieChart, Receipt, UserPlus, Users, UsersRound, X, type LucideIcon,
+  Globe, LogOut, Mail, Megaphone, Menu, MessagesSquare, ShieldCheck, PieChart, Receipt, UserPlus, Users, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { asset } from "@/lib/site";
@@ -17,7 +17,7 @@ import { cx } from "./ui";
 const ICONS: Record<string, LucideIcon> = {
   home: House, building: Building2, folder: FolderLock, pie: PieChart, coins: Coins, award: Award, chart: ChartColumn, mentor: UsersRound,
   door: DoorOpen, receipt: Receipt, file: FileText, users: Users, help: LifeBuoy, inbox: Inbox, userplus: UserPlus, clipboard: ClipboardCheck,
-  calendar: CalendarDays, megaphone: Megaphone, history: History,
+  calendar: CalendarDays, megaphone: Megaphone, history: History, message: MessagesSquare, shield: ShieldCheck, globe: Globe, mail: Mail,
 };
 
 /** Pending-work counts shown as badges next to sidebar items. */
@@ -29,6 +29,9 @@ function badges(db: DB, user: User): Record<string, number> {
       "/admin/tickets": db.tickets.filter((t) => t.status === "Open").length,
       "/admin/bookings": all.flatMap((s) => s.bookings).filter((b) => b.status === "Pending").length,
       "/admin/billing": all.flatMap((s) => s.invoices).filter((i) => i.status === "Due" && i.utr).length,
+      "/admin/messages": db.messages.filter((m) => m.role === "startup" && !m.read).length,
+      "/admin/inbox": db.inquiries.filter((q) => q.status === "New").length,
+      "/admin/verification": all.flatMap((s) => s.memberRequests).filter((r) => r.status === "Pending").length + db.users.flatMap((u) => u.kyc ?? []).filter((k) => k.status === "Pending").length,
     };
   }
   if (user.role === "startup") {
@@ -38,6 +41,7 @@ function badges(db: DB, user: User): Record<string, number> {
       // tickets where SRIIF replied last and the startup hasn't closed them
       "/portal/tickets": db.tickets.filter((t) => t.startupId === s.id && t.status !== "Closed" && t.messages.at(-1)?.role === "admin").length,
       "/portal/invoices": s.invoices.filter((i) => i.status === "Due" && !i.utr).length,
+      "/portal/messages": db.messages.filter((m) => m.startupId === s.id && m.role === "admin" && !m.read).length,
     };
   }
   return {

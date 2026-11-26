@@ -1,4 +1,5 @@
-import { CtaBlock, EventsBlock } from "@/components/sections";
+import { EventsExplorer } from "@/components/events-explorer";
+import { CtaBlock } from "@/components/sections";
 import { PageHero } from "@/components/site-chrome";
 
 export const metadata = { title: "Events" };
@@ -6,8 +7,8 @@ export const metadata = { title: "Events" };
 export default function Events() {
   return (
     <>
-      <PageHero eyebrow="Events" title="Workshops, demo days and meetups" sub="Investors meet SRIIF startups at Demo Day and Investor Connect." img="/img/herohome.jpg" />
-      <EventsBlock />
+      <PageHero eyebrow="What's happening at SRIIF" title="Events calendar" sub="Workshops, clinics, demo days and investor connects. Pick a date on the calendar or browse upcoming, recent and past events." />
+      <EventsExplorer />
       <CtaBlock />
     </>
   );

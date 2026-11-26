@@ -4,12 +4,12 @@ import { Container, PageHero, SectionHead } from "@/components/site-chrome";
 import { LinkButton } from "@/components/ui";
 import { programs } from "@/lib/site";
 
-export const metadata = { title: "Incubation" };
+export const metadata = { title: "Programs" };
 
 export default function Incubation() {
   return (
     <>
-      <PageHero eyebrow="Incubation" title="Three ways to incubate with SRIIF" sub="Resident, Pre-Incubation and Virtual Incubation. Pick the track that fits your stage." img="/img/incubation.jpg">
+      <PageHero eyebrow="Programs & cohorts" title="Three ways to incubate with SRIIF" sub="Pre-Incubation (3 months), Resident Incubation (6 months) and Virtual Incubation (6 months). Each has clear eligibility, deliverables and a review at the end." img="/img/incubation.jpg">
         <LinkButton href="/apply" variant="accent">Apply for Incubation</LinkButton>
       </PageHero>
       <Container>
@@ -29,7 +29,7 @@ export default function Incubation() {
         </div>
       </Container>
       <JourneyBlock />
-      <FaqBlock />
+      <FaqBlock preview />
       <CtaBlock />
     </>
   );

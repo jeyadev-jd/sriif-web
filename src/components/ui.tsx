@@ -33,7 +33,7 @@ export function LinkButton({ href, variant = "primary", size = "md", className, 
 
 export function Card({ children, className, title, action }: { children: ReactNode; className?: string; title?: ReactNode; action?: ReactNode }) {
   return (
-    <section className={cx("rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
+    <section className={cx("min-w-0 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6", className)}>
       {(title || action) && (
         <div className="mb-4 flex items-center justify-between gap-3">
           {title && <h3 className="text-base font-semibold text-slate-900">{title}</h3>}
@@ -56,6 +56,7 @@ const badgeTones: Record<string, string> = {
 const statusTone: Record<string, keyof typeof badgeTones> = {
   Paid: "green", Approved: "green", Resolved: "green", Done: "green", Active: "green", Onboarded: "green", Confirmed: "green", Closed: "slate", Graduated: "blue",
   Due: "amber", Pending: "amber", Open: "amber", Requested: "amber", New: "amber", "In review": "blue", "In progress": "blue",
+  Replied: "blue", Verified: "green", Missing: "red",
   Overdue: "red", Rejected: "red", Declined: "red", Cancelled: "slate", Exited: "slate", Waived: "slate", High: "red", Normal: "slate", Low: "slate",
 };
 

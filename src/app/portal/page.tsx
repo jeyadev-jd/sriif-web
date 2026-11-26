@@ -1,11 +1,12 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, ChartColumn, Coins, FileWarning, LifeBuoy, Megaphone, Receipt, Upload } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, ChartColumn, Coins, FileWarning, LifeBuoy, Megaphone, MessagesSquare, Receipt, ShieldAlert, Upload } from "lucide-react";
+import { kycStatus } from "@/components/team-section";
 import Link from "next/link";
 import { Badge, Card, PageTitle, Progress, Stat } from "@/components/ui";
 import { DOC_TYPES } from "@/lib/seed";
 import { brand } from "@/lib/site";
-import { daysUntil, fmtDate, inr, invoiceTotals, today, useStartup, useStore } from "@/lib/store";
+import { daysUntil, fmtDate, inr, invoiceTotals, useStartup, useStore } from "@/lib/store";
 
 export default function Dashboard() {
   const { db, user } = useStore();
@@ -16,7 +17,9 @@ export default function Dashboard() {
   const expiring = s.docs.filter((d) => d.expiry && daysUntil(d.expiry) < 45);
   const due = s.invoices.filter((i) => i.status === "Due" && !i.utr);
   const dueAmt = due.reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
-  const next = s.meetings.filter((m) => m.date >= today() && m.status !== "Cancelled").sort((a, b) => a.date.localeCompare(b.date))[0];
+  const lastReport = s.reports.at(-1);
+  const unread = db.messages.filter((m) => m.startupId === s.id && m.role === "admin" && !m.read).length;
+  const pendingKyc = db.users.filter((u) => u.startupId === s.id && kycStatus(u.kyc) !== "Verified");
   const openTickets = db.tickets.filter((t) => t.startupId === s.id && (t.status === "Open" || t.status === "In progress"));
   const funding = s.funding.filter((f) => f.currency === "INR").reduce((a, f) => a + f.amount, 0);
 
@@ -27,6 +30,7 @@ export default function Dashboard() {
   const todo = [
     ...missing.map((m) => ({ icon: Upload, text: `Upload ${m.type}`, href: "/portal/documents", tone: "text-red-600" })),
     ...expiring.map((d) => ({ icon: FileWarning, text: `Renew ${d.type} – expires ${fmtDate(d.expiry)}`, href: "/portal/documents", tone: "text-amber-600" })),
+    ...pendingKyc.filter((u) => kycStatus(u.kyc) === "Missing" || kycStatus(u.kyc) === "Rejected").map((u) => ({ icon: ShieldAlert, text: `Upload KYC documents for ${u.name}`, href: "/portal/team", tone: "text-red-600" })),
     ...due.map((i) => ({ icon: Receipt, text: `Pay invoice ${i.no} (${inr(invoiceTotals(i.lines, brand.gstRate).total)})`, href: "/portal/invoices", tone: "text-amber-600" })),
   ];
 
@@ -61,20 +65,16 @@ export default function Dashboard() {
           )}
         </Card>
 
-        <Card title="Next mentor meeting">
-          {next ? (
-            <div className="flex gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand"><CalendarClock size={22} aria-hidden /></span>
-              <div className="text-sm">
-                <p className="font-semibold text-slate-900">{fmtDate(next.date)} · {next.time}</p>
-                <p className="text-slate-600">with {db.users.find((u) => u.id === next.mentorId)?.name}</p>
-                <p className="mt-2 text-slate-700">{next.agenda}</p>
-                <div className="mt-2"><Badge>{next.status}</Badge></div>
-              </div>
+        <Card title="Progress review" action={<Badge tone={lastReport ? "green" : "amber"}>Top priority</Badge>}>
+          <div className="flex gap-3">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand"><CalendarClock size={22} aria-hidden /></span>
+            <div className="text-sm">
+              <p className="font-semibold text-slate-900">{lastReport ? `Last submitted: ${lastReport.period}` : "No report submitted yet"}</p>
+              <p className="text-slate-600">{lastReport ? `${fmtDate(lastReport.submittedOn)} · revenue ${inr(lastReport.revenue)}` : "Share KPIs, revenue and growth with SRIIF."}</p>
+              <Link className="mt-3 inline-flex min-h-10 items-center gap-1 font-semibold text-brand underline" href="/portal/progress">Submit progress update<ArrowRight size={15} aria-hidden /></Link>
             </div>
-          ) : (
-            <p className="text-sm text-slate-500">None scheduled. <Link className="font-semibold text-brand underline" href="/portal/mentorship">Request a meeting</Link></p>
-          )}
+          </div>
+          {unread > 0 && <Link href="/portal/messages" className="mt-4 flex min-h-11 items-center gap-2 rounded-lg bg-accent/15 px-3 text-sm font-semibold text-brand-dark"><MessagesSquare size={18} aria-hidden />{unread} new message{unread > 1 ? "s" : ""} from SRIIF</Link>}
         </Card>
 
         <Card title="Notices from SRIIF" className="lg:col-span-3">

@@ -1,10 +1,12 @@
 "use client";
 
-import { ArrowRight, BadgeCheck, Building2, Calendar, CheckCircle2, FlaskConical, GraduationCap, HandCoins, Handshake, Lightbulb, MapPin, Rocket, Scale, Store, UserRoundCheck, Users, XCircle } from "lucide-react";
+import { ArrowRight, BadgeCheck, Building2, CheckCircle2, FlaskConical, GraduationCap, HandCoins, Handshake, Lightbulb, Rocket, Scale, Store, UserRoundCheck, Users, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { about, asset, brand, events, facilities, faqs, heroWords, impact, journey, links, mentors, news, partners, programs, publicStartups, stats, stories, team, why } from "@/lib/site";
+import { about, asset, brand, facilities, heroWords, journey, mentors, programs, publicStartups, team, why } from "@/lib/site";
+
+export { EventsBlock, FaqBlock, ImpactBlock, JoinBlock, PartnersBlock, TestimonialsBlock } from "./cms-blocks";
 import { Container, SectionHead } from "./site-chrome";
 import { cx, LinkButton } from "./ui";
 
@@ -22,21 +24,6 @@ function Typewriter() {
   return <span aria-live="off">{word.slice(0, n)}<span className="animate-pulse text-accent" aria-hidden>|</span></span>;
 }
 
-function CountUp({ to, prefix, suffix }: { to: number; prefix: string; suffix: string }) {
-  const [v, setV] = useState(0);
-  useEffect(() => {
-    let raf = 0;
-    const start = performance.now();
-    const step = (t: number) => {
-      const p = Math.min(1, (t - start) / 1400);
-      setV(Math.round(to * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) raf = requestAnimationFrame(step);
-    };
-    raf = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(raf);
-  }, [to]);
-  return <>{prefix}{v.toLocaleString("en-IN")}{suffix}</>;
-}
 
 export function Hero() {
   return (
@@ -51,7 +38,7 @@ export function Hero() {
         <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">{brand.subTagline} At SRIHER, Chennai, beside a 1200-bed hospital.</p>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           <LinkButton href="/apply" variant="accent" className="min-h-12 px-6 text-base uppercase tracking-wide">Apply for incubation</LinkButton>
-          <LinkButton href="/login" variant="outline" className="min-h-12 bg-white px-6 text-base">Startup login</LinkButton>
+          <LinkButton href="/login" variant="outline" className="min-h-12 bg-white px-6 text-base">Portal login</LinkButton>
         </div>
       </div>
       <div className="mx-auto max-w-6xl px-4">
@@ -62,13 +49,9 @@ export function Hero() {
           </div>
           <div className="relative aspect-[3/4] bg-brand-dark sm:aspect-[16/9] md:aspect-[16/7]">
             <video className="absolute inset-0 h-full w-full object-cover" src={asset("/img/home.mp4")} poster={asset("/img/herohome.jpg")} autoPlay muted loop playsInline aria-label="Life at the SRIIF incubation centre" />
-            <div className="absolute inset-x-0 bottom-0 grid grid-cols-2 gap-px bg-white/10 backdrop-blur md:grid-cols-4">
-              {stats.map((x) => (
-                <div key={x.label} className="bg-brand-dark/80 px-5 py-4 text-left text-white">
-                  <p className="display text-3xl text-accent md:text-4xl"><CountUp to={x.value} prefix={x.prefix} suffix={x.suffix} /></p>
-                  <p className="text-xs text-white/75 md:text-sm">{x.label}</p>
-                </div>
-              ))}
+            <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-t from-brand-dark/90 to-transparent px-5 pb-4 pt-12 text-left text-white">
+              <p className="text-sm font-semibold">Labs, hospital access and co-working on one campus</p>
+              <Link href="/facilities" className="inline-flex min-h-10 items-center gap-1 rounded-full bg-white/15 px-4 text-sm font-semibold backdrop-blur hover:bg-white/25">Tour facilities<ArrowRight size={16} aria-hidden /></Link>
             </div>
           </div>
         </div>
@@ -135,24 +118,6 @@ export function WhyBlock() {
   );
 }
 
-export function ImpactBlock() {
-  return (
-    <div className="border-y border-slate-200 bg-surface">
-      <Container>
-        <SectionHead label="Our impact" title="Numbers that" mark="speak" sub="What SRIIF founders have built so far." />
-        <div className="grid grid-cols-2 divide-slate-200 border-t border-slate-200 md:grid-cols-3 lg:grid-cols-6 lg:divide-x">
-          {impact.map((x) => (
-            <div key={x.label} className="py-6 lg:px-5 lg:first:pl-0">
-              <p className="display text-5xl tabular-nums text-brand-dark">{x.value}</p>
-              <p className="mt-2 text-sm font-semibold text-slate-800">{x.label}</p>
-              <p className="text-xs text-slate-500">{x.note}</p>
-            </div>
-          ))}
-        </div>
-      </Container>
-    </div>
-  );
-}
 
 export function ProgramsBlock() {
   const [sel, setSel] = useState(0);
@@ -233,23 +198,6 @@ export function FacilitiesBlock({ all }: { all?: boolean }) {
   );
 }
 
-export function PartnersBlock() {
-  return (
-    <div className="bg-surface">
-      <Container>
-        <SectionHead center label="Partners" title="Backed by industry, government and academia" />
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {partners.map((p) => (
-            <div key={p.title} className="rounded-xl bg-white p-5 text-center shadow-sm">
-              <p className="font-semibold text-brand-dark">{p.title}</p>
-              <p className="text-xs text-slate-500">{p.tag}</p>
-            </div>
-          ))}
-        </div>
-      </Container>
-    </div>
-  );
-}
 
 function Initials({ name }: { name: string }) {
   const i = name.replace(/^(Dr\.|Mr\.|Ms\.)\s*/, "").split(" ").map((x) => x[0]).slice(0, 2).join("");
@@ -279,7 +227,7 @@ export function TeamBlock() {
 export function MentorsBlock() {
   return (
     <Container>
-      <SectionHead label="Mentors" title="Learn from people who have done it" sub="Incubated startups book mentor sessions from their portal." />
+      <SectionHead label="Mentors" title="Learn from people who have done it" sub="Domain experts who review SRIIF startups and guide founders." />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {mentors.map((m) => (
           <div key={m.name} className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -291,7 +239,7 @@ export function MentorsBlock() {
         ))}
       </div>
       <div className="mt-8 rounded-xl bg-surface p-5 text-sm text-slate-700">
-        Want to mentor SRIIF startups? <a className="font-semibold text-brand underline" href={links.mentorForm} target="_blank" rel="noreferrer">Fill the mentor form</a>.
+        Want to mentor SRIIF startups? <Link className="font-semibold text-brand underline" href="/join?role=Mentor">Express interest on the Join Us page</Link>.
       </div>
     </Container>
   );
@@ -328,73 +276,8 @@ export function StartupsBlock({ limit }: { limit?: number }) {
   );
 }
 
-export function StoriesBlock() {
-  return (
-    <Container>
-      <SectionHead label="Success stories" title="Don't take our" mark="word" after="for it" />
-      <div className="grid gap-5 md:grid-cols-3">
-        {stories.map((x, i) => (
-          <figure key={x.startup} className={cx("flex flex-col rounded-2xl border p-7", i === 1 ? "border-brand-dark bg-brand-dark text-white md:-translate-y-3" : "border-slate-200 bg-white")}>
-            <p className={cx("display text-4xl", i === 1 ? "text-accent" : "text-brand-dark")}>{x.stat}</p>
-            <blockquote className={cx("mt-4 flex-1", i === 1 ? "text-white/85" : "text-slate-700")}>“{x.quote}”</blockquote>
-            <figcaption className="mt-6 flex items-center gap-3">
-              <span className={cx("flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold", i === 1 ? "bg-accent text-brand-dark" : "bg-brand text-white")} aria-hidden>{x.name.split(" ").map((n) => n[0]).join("")}</span>
-              <span className="text-sm"><b className="block">{x.name}</b><span className={i === 1 ? "text-white/60" : "text-slate-500"}>{x.role}, {x.startup}</span></span>
-            </figcaption>
-          </figure>
-        ))}
-      </div>
-    </Container>
-  );
-}
 
-export function EventsBlock() {
-  return (
-    <Container>
-      <SectionHead label="Events & news" title="What is happening at SRIIF" />
-      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
-        <div className="grid gap-4 sm:grid-cols-2">
-          {events.map((e) => (
-            <div key={e.title} className="rounded-xl border border-slate-200 bg-white p-5">
-              <p className="flex items-center gap-1.5 text-sm font-semibold text-brand"><Calendar size={15} aria-hidden />{e.date}</p>
-              <p className="mt-1 text-lg font-semibold text-brand-dark">{e.title}</p>
-              <p className="text-sm text-slate-600">{e.desc}</p>
-              <p className="mt-3 flex items-center gap-1.5 text-xs text-slate-500"><MapPin size={14} aria-hidden /> {e.place}</p>
-            </div>
-          ))}
-        </div>
-        <div className="rounded-xl bg-surface p-5">
-          <p className="mb-3 font-semibold text-brand-dark">Latest news</p>
-          {news.map((n) => (
-            <div key={n.title} className="border-b border-slate-200 py-3 last:border-0">
-              <p className="text-xs text-slate-500">{n.date}</p>
-              <p className="font-medium">{n.title}</p>
-              <p className="text-sm text-slate-600">{n.desc}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </Container>
-  );
-}
 
-export function FaqBlock() {
-  return (
-    <div className="bg-surface">
-      <Container className="max-w-3xl">
-        <SectionHead center label="FAQs" title="Quick answers" />
-        <div className="space-y-3">
-          {faqs.map((f) => (
-            <details key={f.q} className="group rounded-xl bg-white p-4 shadow-sm">
-              <summary className="cursor-pointer list-none font-semibold text-brand-dark">{f.q}<span className="float-right transition group-open:rotate-45">+</span></summary>
-              <p className="mt-2 text-sm text-slate-600">{f.a}</p>
-            </details>
-          ))}
-        </div>
-      </Container>
-    </div>
-  );
-}
 
 export function CtaBlock() {
   return (
@@ -416,8 +299,8 @@ export function CtaBlock() {
 const PATHS = [
   { icon: Rocket, who: "I am a founder", desc: "Incubation, seats, labs and mentors for your startup.", href: "/apply", cta: "Apply for incubation" },
   { icon: Lightbulb, who: "I am a student or faculty", desc: "Turn research or a campus idea into a venture with Pre-Incubation.", href: "/incubation/pre-incubation", cta: "See Pre-Incubation" },
-  { icon: UserRoundCheck, who: "I want to mentor", desc: "Guide healthcare and deep-tech founders in your domain.", href: "/services/mentors", cta: "Become a mentor" },
-  { icon: Handshake, who: "I represent a partner", desc: "Labs, hospital pilots, CSR challenges and services.", href: "/contact", cta: "Talk to SRIIF" },
+  { icon: UserRoundCheck, who: "I want to mentor", desc: "Guide healthcare and deep-tech founders in your domain.", href: "/join?role=Mentor", cta: "Become a mentor" },
+  { icon: Handshake, who: "I represent a partner", desc: "Labs, hospital pilots, CSR challenges and services.", href: "/join?role=Corporate%20partner", cta: "Partner with SRIIF" },
 ];
 
 /** Enterprise-gateway path selection: one clear entry per audience. */

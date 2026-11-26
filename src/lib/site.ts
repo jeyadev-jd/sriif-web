@@ -32,65 +32,49 @@ export const links = {
 
 export type NavLink = { label: string; href: string; children?: { label: string; href: string }[] };
 
-// Top navigation as laid out in the Excel "Home" sheet.
+// Top navigation (institutional layout: About, Programs, Facilities, Events, Media, Contact).
 export const nav: NavLink[] = [
+  { label: "Home", href: "/" },
   {
-    label: "Home",
-    href: "/",
+    label: "About Us",
+    href: "/about",
     children: [
-      { label: "About", href: "/about" },
-      { label: "Facilities", href: "/facilities" },
-      { label: "Funding", href: "/funding" },
+      { label: "About SRIIF", href: "/about" },
+      { label: "Our team", href: "/about/team" },
+      { label: "Board & advisors", href: "/about/board" },
+      { label: "Partners", href: "/services/partners" },
+      { label: "Portfolio startups", href: "/startups" },
+      { label: "Mentor network", href: "/services/mentors" },
     ],
   },
   {
-    label: "Incubation",
+    label: "Programs",
     href: "/incubation",
     children: [
-      { label: "Resident", href: "/incubation/resident" },
-      { label: "Pre-Incubation", href: "/incubation/pre-incubation" },
-      { label: "Virtual Incubation", href: "/incubation/virtual" },
+      { label: "Pre-Incubation (3 months)", href: "/incubation/pre-incubation" },
+      { label: "Resident Incubation (6 months)", href: "/incubation/resident" },
+      { label: "Virtual Incubation (6 months)", href: "/incubation/virtual" },
+      { label: "Funding support", href: "/funding" },
       { label: "Apply for Incubation", href: "/apply" },
     ],
   },
   {
-    label: "Services",
-    href: "/services",
+    label: "Facilities",
+    href: "/facilities",
     children: [
-      { label: "Mentors", href: "/services/mentors" },
-      { label: "Partnered services", href: "/services/partners" },
+      { label: "All facilities", href: "/facilities" },
       { label: "Co-working space", href: "/services/co-working" },
       { label: "Lab & Research", href: "/services/labs" },
+      { label: "Partnered services", href: "/services" },
     ],
   },
   { label: "Events", href: "/events" },
-  { label: "Startups", href: "/startups" },
-  { label: "Contact", href: "/contact" },
+  { label: "Media & Gallery", href: "/media" },
+  { label: "Join Us", href: "/join" },
+  { label: "Contact Us", href: "/contact" },
 ];
 
 export const heroWords = ["scalable businesses", "deep-tech ventures", "social impact", "global brands"];
-
-export const heroCards = [
-  { title: "Next cohort: Jan 2027", sub: "Applications close 10 Dec" },
-  { title: "100+ mentors", sub: "Book a 1:1 session" },
-  { title: "Grants & angel access", sub: "Pitch at every Demo Day" },
-];
-
-export const stats = [
-  { prefix: "", value: 10, suffix: "+", label: "Startups incubated" },
-  { prefix: "₹", value: 15, suffix: " Cr", label: "Funding raised" },
-  { prefix: "", value: 100, suffix: "+", label: "Mentors & experts" },
-  { prefix: "", value: 10000, suffix: "", label: "Sq. ft. facilities" },
-];
-
-export const impact = [
-  { value: "10+", label: "Startups incubated", note: "Since 2018" },
-  { value: "₹15 Cr", label: "Funding raised", note: "By our portfolio" },
-  { value: "350+", label: "Jobs created", note: "Across Tamil Nadu" },
-  { value: "100+", label: "Mentors on panel", note: "Across 12 domains" },
-  { value: "12", label: "Patents filed", note: "By incubated teams" },
-  { value: "10,000", label: "Sq. ft. of facilities", note: "Labs, co-working, halls" },
-];
 
 export const about = {
   intro:
@@ -128,6 +112,8 @@ export type Program = {
   img: string;
   stage: string;
   bullets: string[];
+  eligibility: string[];
+  deliverables: string[];
 };
 
 export const programs: Program[] = [
@@ -135,28 +121,34 @@ export const programs: Program[] = [
     slug: "pre-incubation",
     title: "Pre-Incubation",
     duration: "3 months",
-    desc: "Validate your idea with mentors and a small seed grant before you build.",
+    desc: "Validate the idea, build a first prototype and shape the business model before you commit to full incubation.",
     img: `${BASE}/img/preincubation.jpg`,
     stage: "Idea stage",
-    bullets: ["Idea validation workshops", "Seed grant support", "Mentor matching"],
+    bullets: ["Idea validation workshops", "Prototype development support", "Business model structuring", "Mentor reviews"],
+    eligibility: ["Students, faculty, alumni or outside founders", "An idea or early prototype (TRL 1–3)", "Company registration not needed yet"],
+    deliverables: ["Validated problem statement", "Working prototype or proof of concept", "Business model canvas and pitch deck", "Go / no-go review for Resident or Virtual Incubation"],
   },
   {
     slug: "resident",
     title: "Resident Incubation",
-    duration: "24 months",
-    desc: "A seat, mentoring, compliance help and investor access while you build and launch on campus.",
+    duration: "6 months",
+    desc: "A seat on campus, lab infrastructure and intensive commercialization support while you build and launch.",
     img: `${BASE}/img/incubation.jpg`,
     stage: "Prototype to revenue",
-    bullets: ["Dedicated seat or cabin", "Lab & instrument access", "Legal, IP and GST support", "Investor demo days"],
+    bullets: ["Dedicated seat or cabin", "Lab, instrument and hospital access", "Commercialization, legal, IP and GST support", "Investor demo days"],
+    eligibility: ["Registered startup (Pvt Ltd or LLP)", "Working prototype (TRL 4 or above)", "At least one full-time founder on campus"],
+    deliverables: ["Pilot or first paying customers", "IP filing plan and regulatory pathway", "Quarterly progress reviews with SRIIF", "Investor-ready pitch at Demo Day"],
   },
   {
     slug: "virtual",
     title: "Virtual Incubation",
-    duration: "12 months",
-    desc: "Mentoring, lab access on demand and the SRIIF network without a permanent seat.",
+    duration: "6 months",
+    desc: "Remote access to the SRIIF ecosystem, compliance support and investor and network linkages, without a physical seat.",
     img: `${BASE}/img/accelaration.jpg`,
     stage: "Any stage",
-    bullets: ["Mentor sessions", "Pay-per-use labs", "Fundraising prep", "Go-to-market mentors"],
+    bullets: ["Remote mentor reviews", "Compliance and documentation support", "Investor and network linkages", "Pay-per-use labs and meeting rooms"],
+    eligibility: ["Registered startup anywhere in India", "Product in development or in market", "Able to attend reviews online"],
+    deliverables: ["Compliance checklist completed", "Investor introductions", "Quarterly progress reviews with SRIIF", "Access to SRIIF events and Demo Day"],
   },
 ];
 
@@ -177,15 +169,15 @@ export const facilities = [
   { title: "Instrumentation lab", tag: "Shared", desc: "Instrumentation lab and GLP-accredited small animal facility.", img: `${BASE}/img/instrument.jpg` },
 ];
 
-export const partners = [
-  { title: "Startup TN", tag: "Government" },
-  { title: "BIRAC BioNEST", tag: "Government" },
-  { title: "DST – NIDHI", tag: "Government" },
-  { title: "IIT Madras Research Park", tag: "Academic" },
-  { title: "Angel Network", tag: "Investor" },
-  { title: "MedTech Council", tag: "Industry" },
-  { title: "Legal Aid Foundation", tag: "Support" },
-  { title: "Global Alumni Fund", tag: "Alumni" },
+export const partners: { title: string; tag: string; desc: string; url: string }[] = [
+  { title: "Startup TN", tag: "Government", desc: "Tamil Nadu startup mission: schemes, grants and recognition.", url: "https://startuptn.in" },
+  { title: "BIRAC BioNEST", tag: "Government", desc: "Biotech incubation support from the DBT, Government of India.", url: "https://birac.nic.in" },
+  { title: "DST – NIDHI", tag: "Government", desc: "National initiative for developing and harnessing innovations.", url: "https://nidhi.dst.gov.in" },
+  { title: "Startup India", tag: "Government", desc: "DPIIT recognition and national startup programmes.", url: "https://www.startupindia.gov.in" },
+  { title: "IIT Madras Research Park", tag: "Academic", desc: "Research collaboration and deep-tech networks.", url: "https://respark.iitm.ac.in" },
+  { title: "Angel Network", tag: "Investor", desc: "Angel investors who attend SRIIF Demo Days.", url: "" },
+  { title: "MedTech Council", tag: "Industry", desc: "Industry partners for pilots and clinical validation.", url: "" },
+  { title: "Cloud & software partners", tag: "Technology", desc: "Cloud credits and discounted tools for incubatees.", url: "" },
 ];
 
 export const partneredServices = [
@@ -225,24 +217,6 @@ export const publicStartups = [
   { name: "CareLoop", sector: "HealthTech", desc: "Remote patient monitoring platform.", year: "2026", stage: "Prototype" },
 ];
 
-export const stories = [
-  { startup: "GreenLeaf Agritech", sector: "AgriTech", quote: "SRIIF gave us a lab, mentors and our first pilot farms. We went from a campus prototype to 2,000 farmers in two years.", stat: "₹1.8 Cr ARR", name: "Priya Raman", role: "Founder & CEO" },
-  { startup: "MediSense Labs", sector: "HealthTech", quote: "The clinical mentors and investor demo day shaved a year off our funding journey.", stat: "₹4 Cr raised", name: "Arjun Das", role: "Co-founder" },
-  { startup: "EduNext", sector: "EdTech", quote: "Our first ten schools came from SRIIF introductions. Today we serve forty.", stat: "40 schools", name: "Rahul S", role: "Founder" },
-];
-
-export const events = [
-  { title: "Demo Day 2027", date: "15 Jan 2027", desc: "Startups pitch to investors and corporates.", place: "SRIIF Event Hall" },
-  { title: "IP & Legal Clinic", date: "10 Dec 2026", desc: "One-to-one sessions with IP attorneys.", place: "Meeting Room 2" },
-  { title: "Investor Connect", date: "28 Feb 2027", desc: "Meet angel networks and seed funds.", place: "Online" },
-  { title: "Founders Meetup", date: "Monthly", desc: "Peer learning and networking evening.", place: "Cafeteria & Lounge" },
-];
-
-export const news = [
-  { title: "SRIIF startup closes seed round", date: "Nov 2026", desc: "GreenLeaf Agritech raises seed funding." },
-  { title: "New partnership announced", date: "Oct 2026", desc: "SRIIF joins hands with Startup TN." },
-];
-
 export const funding = [
   { title: "Seed grants", desc: "Early grants for proof of concept through BIRAC BioNEST and Startup TN schemes." },
   { title: "Angel & VC connects", desc: "Introductions to angel networks and seed funds at Demo Days and Investor Connect." },
@@ -250,11 +224,27 @@ export const funding = [
   { title: "CSR & grants", desc: "CSR-funded challenges and grants for healthcare and sustainability ventures." },
 ];
 
-export const faqs = [
-  { q: "Who can apply?", a: "Students, faculty, alumni and outside founders with a scalable idea." },
-  { q: "How do I join SRIIF?", a: "Email SRIIF or fill the application form. If selected, the SRIIF admin onboards your team and creates your portal login. There is no self sign-up." },
-  { q: "How is rent charged?", a: "Seats are billed monthly, with GST and the instrument usage tariff added." },
-  { q: "How long is incubation?", a: "Typically 24 months, extendable on review. Incubatees present an extension case every 12 months after the first 18 months." },
-  { q: "Do you take equity?", a: "Terms are shared during onboarding; SRIIF management defines them." },
-  { q: "Can I use the labs without a seat?", a: "Yes. Instruments are available on a pay-per-use basis." },
+export const faqCategories = ["Applications & timelines", "Cohort selection", "Fees & equity", "IP policy", "Facility access"] as const;
+
+export const faqs: { cat: (typeof faqCategories)[number]; q: string; a: string }[] = [
+  { cat: "Applications & timelines", q: "Who can apply?", a: "Students, faculty, alumni and outside founders with a scalable idea." },
+  { cat: "Applications & timelines", q: "How do I join SRIIF?", a: "Email SRIIF or fill the application form. If selected, the SRIIF admin onboards your team and creates your portal login. There is no self sign-up." },
+  { cat: "Applications & timelines", q: "When are applications open?", a: "Requests are accepted all year. Cohorts start in January and July; check the pop-up and Events page for the current deadline." },
+  { cat: "Applications & timelines", q: "How long is each program?", a: "Pre-Incubation runs for 3 months, Resident and Virtual Incubation for 6 months each. Extensions are decided at the progress review." },
+  { cat: "Cohort selection", q: "How are startups selected?", a: "The SRIIF team screens each request, meets the founders and invites shortlisted teams to pitch to a selection panel." },
+  { cat: "Cohort selection", q: "What does the panel look for?", a: "A clear problem, a capable team, feasibility of the technology, market potential and fit with SRIIF focus sectors." },
+  { cat: "Cohort selection", q: "Which track should I choose?", a: "Pre-Incubation for ideas, Resident for teams that need a seat and labs on campus, Virtual for registered startups that work remotely. The panel can suggest a different track." },
+  { cat: "Fees & equity", q: "How is rent charged?", a: "Seats are billed monthly, with GST and the instrument usage tariff added. Invoices and receipts are available in the startup portal." },
+  { cat: "Fees & equity", q: "Do you take equity?", a: "Terms are shared during onboarding; SRIIF management defines them." },
+  { cat: "IP policy", q: "Who owns the IP I build at SRIIF?", a: "IP terms are part of the incubation agreement shared during onboarding. Founders get support for patent and trademark filing through partnered legal firms." },
+  { cat: "IP policy", q: "Can faculty and students take institute IP into a startup?", a: "This follows the SRIHER IP and technology transfer policy. The SRIIF team guides you through the approval and licensing process." },
+  { cat: "Facility access", q: "Can I use the labs without a seat?", a: "Yes. Instruments are available on a pay-per-use basis. Virtual incubatees book labs and meeting rooms from the portal." },
+  { cat: "Facility access", q: "How do I book facilities?", a: "Incubated startups book rooms, labs and seats from the portal. SRIIF approves each booking and usage is added to the monthly invoice." },
 ];
+
+export const maps = {
+  query: "Sri Ramachandra Institute of Higher Education and Research, Porur, Chennai",
+  embed: "https://www.google.com/maps?q=Sri+Ramachandra+Institute+of+Higher+Education+and+Research+Porur+Chennai&output=embed",
+  open: "https://www.google.com/maps/search/?api=1&query=Sri+Ramachandra+Institute+of+Higher+Education+and+Research+Porur+Chennai",
+  directions: "https://www.google.com/maps/dir/?api=1&destination=Sri+Ramachandra+Institute+of+Higher+Education+and+Research+Porur+Chennai",
+};

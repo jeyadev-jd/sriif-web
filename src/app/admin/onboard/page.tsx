@@ -49,7 +49,7 @@ function Onboard({ reqId }: { reqId: string | null }) {
         website: "", linkedin: "", regAddress: "", commAddress: "", email: s.email, phone: s.phone, oneLiner: s.oneLiner, status: "Active",
         mentorIds: s.mentorIds, seat: { type: s.seatType, count: Number(s.seatCount), rate: Number(s.seatRate) }, equityTaken: s.equityTaken,
         docs: [], founders: team.filter((m) => /founder/i.test(m.designation)).map((m) => ({ name: m.name, designation: m.designation, equity: 0, din: "" })),
-        holdings: [], shareClasses: "", funding: [], awards: [], reports: [], annual: [], meetings: [], bookings: [], invoices: [],
+        holdings: [], shareClasses: "", funding: [], awards: [], reports: [], annual: [], meetings: [], bookings: [], invoices: [], gstin: "", memberRequests: [],
       });
       for (const m of team) d.users.push({ id: uid(), name: m.name.trim(), designation: m.designation, email: m.email.trim(), phone: m.phone, role: "startup", startupId: id, active: true });
       const r = d.requests.find((x) => x.id === reqId);

@@ -9,7 +9,7 @@ export default function Page() {
   if (!s) return null;
   return (
     <>
-      <PageTitle title="Space, facilities & access" sub="Seats, access card and facility bookings." />
+      <PageTitle title="Facility booking" sub="Book meeting rooms, labs and seats available to your incubation tier." />
       <FacilitiesSection s={s} mode="startup" />
     </>
   );

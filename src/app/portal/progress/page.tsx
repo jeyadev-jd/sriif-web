@@ -9,7 +9,7 @@ export default function Page() {
   if (!s) return null;
   return (
     <>
-      <PageTitle title="Progress & yearly review" sub="Quarterly progress forms and annual review documents." />
+      <PageTitle title="Progress review" sub="Submit KPIs, revenue and growth updates each quarter. SRIIF admins review every submission." />
       <ProgressSection s={s} mode="startup" />
     </>
   );

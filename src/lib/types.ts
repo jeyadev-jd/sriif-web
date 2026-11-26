@@ -13,6 +13,24 @@ export type User = {
   startupId?: string; // startup team members only
   expertise?: string; // mentors only
   active: boolean;
+  kyc?: KycDoc[]; // e-verification documents for startup team members
+};
+
+/** Team member e-verification (KYC). Only file names are kept in this demo. */
+export type KycDoc = { type: string; name: string; uploadedOn: string; status: "Pending" | "Verified" | "Rejected" };
+
+/** A startup proposes a team member; only a SRIIF admin can approve and create the login. */
+export type MemberRequest = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  designation: string;
+  kyc: KycDoc[];
+  requestedBy: string;
+  on: string;
+  status: "Pending" | "Approved" | "Rejected";
+  note: string;
 };
 
 export type DocFile = {
@@ -88,8 +106,15 @@ export type Booking = {
   date: string;
   slot: string;
   purpose: string;
-  status: "Pending" | "Approved" | "Rejected";
+  status: "Pending" | "Approved" | "Rejected" | "Cancelled";
+  byAdmin?: boolean; // allocated by SRIIF on the startup's behalf
 };
+
+/** Admin hold on a facility slot: maintenance, an external event or an internal block. */
+export type FacilityBlock = { id: string; facility: string; date: string; slot: string; kind: "Blocked" | "External event" | "Maintenance"; reason: string };
+
+/** amount = qty x rate (pre-tax). sac = GST service accounting code. */
+export type InvoiceLine = { label: string; amount: number; sac?: string; qty?: number; rate?: number };
 
 export type Invoice = {
   id: string;
@@ -97,7 +122,7 @@ export type Invoice = {
   period: string;
   issued: string;
   due: string;
-  lines: { label: string; amount: number }[];
+  lines: InvoiceLine[];
   status: "Due" | "Paid" | "Waived";
   paidOn?: string;
   receiptNo?: string;
@@ -109,6 +134,8 @@ export type Startup = {
   // 1. Profile
   name: string;
   logo: string; // data URL or ""
+  pitchDeck?: { name: string; version: number; uploadedOn: string; history: { name: string; version: number; uploadedOn: string }[] };
+  gstin: string;
   trl: number;
   sectors: string[];
   stage: "Idea" | "MVP" | "Revenue" | "Scaling";
@@ -141,6 +168,7 @@ export type Startup = {
   meetings: Meeting[];
   bookings: Booking[];
   invoices: Invoice[];
+  memberRequests: MemberRequest[];
 };
 
 export type TicketMsg = { by: string; role: Role; text: string; at: string };
@@ -174,6 +202,46 @@ export type JoinRequest = {
 };
 
 export type Notice = { id: string; title: string; body: string; date: string };
+
+/** Direct thread between one startup team and SRIIF admins. */
+export type Message = { id: string; startupId: string; by: string; role: Role; text: string; at: string; read: boolean };
+
+/** Website submissions: Contact Us form and Join Us (mentor / investor / partner interest). */
+export type Inquiry = {
+  id: string;
+  kind: "Contact" | "Join Us";
+  type: string; // inquiry type or supporter role
+  name: string;
+  email: string;
+  phone: string;
+  org: string;
+  message: string;
+  at: string;
+  status: "New" | "Replied" | "Closed";
+};
+
+// ── Website content managed from Admin → Website content ──
+export type EventCategory = "Demo Day" | "Workshop" | "Investor Connect" | "Meetup" | "Hackathon" | "Clinic";
+export type SiteEvent = {
+  id: string;
+  title: string;
+  date: string; // ISO
+  time: string;
+  place: string;
+  category: EventCategory;
+  summary: string;
+  details: string;
+  registerUrl: string;
+  brochure?: { name: string; data: string }; // uploaded PDF (data URL); otherwise a printable brochure is generated
+};
+export type GalleryCategory = "Demo days" | "Workshops" | "MoU signings" | "Visitor delegations" | "Press";
+export type GalleryItem = { id: string; title: string; date: string; category: GalleryCategory; img: string; caption: string; link: string };
+export type Testimonial = { id: string; kind: "Founder" | "Partner"; name: string; role: string; org: string; quote: string; stat: string };
+export type Kpi = { id: string; label: string; value: string; note: string; auto?: "events" | "startups" };
+export type Popup = { enabled: boolean; title: string; body: string; ctaLabel: string; ctaHref: string; version: number };
+export type Person = { id: string; name: string; role: string; bio: string; img: string };
+export type Social = { linkedin: string; x: string; instagram: string; youtube: string };
+export type Cms = { popup: Popup; kpis: Kpi[]; events: SiteEvent[]; gallery: GalleryItem[]; testimonials: Testimonial[]; board: Person[]; social: Social };
 export type AuditEntry = { at: string; by: string; action: string };
 
 export type DB = {
@@ -184,4 +252,8 @@ export type DB = {
   notices: Notice[];
   audit: AuditEntry[];
   facilities: string[];
+  blocks: FacilityBlock[];
+  messages: Message[];
+  inquiries: Inquiry[];
+  cms: Cms;
 };

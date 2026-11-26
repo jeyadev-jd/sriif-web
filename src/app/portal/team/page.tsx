@@ -9,7 +9,7 @@ export default function Page() {
   if (!s) return null;
   return (
     <>
-      <PageTitle title="Team" sub="Your team members and their logins." />
+      <PageTitle title="Team & e-verification" sub="Your team, their KYC status and requests for new members." />
       <TeamSection s={s} mode="startup" />
     </>
   );

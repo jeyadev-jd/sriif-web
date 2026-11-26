@@ -1,4 +1,5 @@
-import type { DB, Startup } from "./types";
+import type { Cms, DB, Startup } from "./types";
+import { BASE } from "./site";
 
 export const DOC_TYPES: { type: string; mandatory: boolean; financial: boolean }[] = [
   { type: "Certificate of Incorporation / Registration", mandatory: true, financial: false },
@@ -16,12 +17,47 @@ export const DOC_TYPES: { type: string; mandatory: boolean; financial: boolean }
 
 export const SECTORS = ["HealthTech", "MedTech", "BioTech", "EdTech", "AgriTech", "CleanTech", "SportsTech", "AssistiveTech", "AI/ML", "Other"];
 
-export const TICKET_CATEGORIES = ["Mentor request", "Facilities", "Billing", "Technical / IT", "Legal / IP", "Funding", "Documents", "Other"];
+export const TICKET_CATEGORIES = ["Technical / IT", "Facility maintenance", "Compliance", "Admin query", "Billing", "Legal / IP", "Documents", "Other"];
+
+export const KYC_TYPES = ["Aadhaar / government photo ID", "PAN card", "Passport-size photo", "Address proof"];
+export const MANDATORY_KYC = ["Aadhaar / government photo ID", "PAN card"];
+
+export const SLOTS = ["09:00–10:00", "10:00–12:00", "12:00–14:00", "14:00–17:00", "Full day"];
+
+type Program = Startup["program"];
+const ALL: Program[] = ["Pre-Incubation", "Resident Incubation", "Virtual Incubation"];
+/** Which incubation tiers may book each facility. Virtual startups have no physical seat. */
+export const FACILITY_RULES: Record<string, Program[]> = {
+  "Co-working Space": ["Pre-Incubation", "Resident Incubation"],
+  "Board Room": ALL,
+  "Meeting Room 2": ALL,
+  "Instrument Facility (wet lab)": ALL,
+  "Clinical testing lab": ["Resident Incubation", "Virtual Incubation"],
+  "Instrumentation lab": ALL,
+  "Hospital access (on request)": ["Resident Incubation", "Virtual Incubation"],
+};
+
+export const INQUIRY_TYPES: { type: string; desk: string }[] = [
+  { type: "Startup application", desk: "Incubation desk" },
+  { type: "Corporate partnership", desk: "Partnerships team" },
+  { type: "Facility inquiry", desk: "Facilities office" },
+  { type: "General", desk: "SRIIF office" },
+];
+
+export const JOIN_ROLES = [
+  { role: "Mentor", desc: "Share domain expertise with founders through 1:1 sessions and reviews." },
+  { role: "Investor", desc: "Meet SRIIF startups at Demo Day and Investor Connect." },
+  { role: "Corporate partner", desc: "Run pilots, innovation challenges or CSR programmes with startups." },
+  { role: "Technology provider", desc: "Offer cloud credits, tools or lab equipment to incubatees." },
+  { role: "Ecosystem enabler", desc: "Government bodies, academia and associations that support founders." },
+];
 
 const careloop: Startup = {
   id: "s1",
   name: "CareLoop Health Pvt Ltd",
   logo: "",
+  pitchDeck: { name: "CareLoop_Pitch_v3.pdf", version: 3, uploadedOn: "2026-10-12", history: [{ name: "CareLoop_Pitch_v2.pdf", version: 2, uploadedOn: "2026-06-02" }, { name: "CareLoop_Pitch.pdf", version: 1, uploadedOn: "2026-02-10" }] },
+  gstin: "33AABCC1234D1Z5",
   trl: 5,
   sectors: ["HealthTech", "AI/ML"],
   stage: "MVP",
@@ -82,8 +118,17 @@ const careloop: Startup = {
     { id: "b2", facility: "Instrument Facility (wet lab)", date: "2026-12-08", slot: "14:00–17:00", purpose: "Sensor calibration", status: "Pending" },
   ],
   invoices: [
-    { id: "i1", no: "SRIIF/2026/0101", period: "Oct 2026", issued: "2026-10-01", due: "2026-10-10", lines: [{ label: "Dedicated desk × 3", amount: 9000 }, { label: "Lab usage (6 hrs)", amount: 1800 }], status: "Paid", paidOn: "2026-10-08", receiptNo: "RCPT-0101", utr: "UTR88213" },
-    { id: "i2", no: "SRIIF/2026/0134", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Dedicated desk × 3", amount: 9000 }], status: "Due" },
+    { id: "i1", no: "SRIIF/2026/0101", period: "Oct 2026", issued: "2026-10-01", due: "2026-10-10", lines: [{ label: "Dedicated desk", sac: "997212", qty: 3, rate: 3000, amount: 9000 }, { label: "Lab usage (hours)", sac: "998346", qty: 6, rate: 300, amount: 1800 }], status: "Paid", paidOn: "2026-10-08", receiptNo: "RCPT-0101", utr: "UTR88213" },
+    { id: "i2", no: "SRIIF/2026/0134", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Dedicated desk", sac: "997212", qty: 3, rate: 3000, amount: 9000 }], status: "Due" },
+  ],
+  memberRequests: [
+    {
+      id: "mr1", name: "Nisha Varghese", email: "nisha@careloop.example.in", phone: "9876511111", designation: "Clinical Lead", requestedBy: "Priya Raman", on: "2026-11-22", status: "Pending", note: "",
+      kyc: [
+        { type: "Aadhaar / government photo ID", name: "Nisha_Aadhaar.pdf", uploadedOn: "2026-11-22", status: "Pending" },
+        { type: "PAN card", name: "Nisha_PAN.pdf", uploadedOn: "2026-11-22", status: "Pending" },
+      ],
+    },
   ],
 };
 
@@ -109,10 +154,17 @@ const greenleaf: Startup = {
   holdings: [],
   funding: [{ id: "f9", amount: 2500000, currency: "INR", type: "CSR", source: "Tech Corp India CSR", date: "2026-01-10", round: "Not applicable" }],
   awards: [],
-  reports: [],
+  pitchDeck: undefined,
+  gstin: "",
+  reports: [
+    { id: "r5", period: "Q1 2026", milestones: "Sensors installed at 600 farms.", users: 600, revenue: 900000, pilots: 3, partnerships: 2, challenges: "Monsoon logistics.", support: "FPO introductions.", submittedOn: "2026-04-06", submittedBy: "Karthik N" },
+    { id: "r6", period: "Q2 2026", milestones: "1,400 farms; state agri dept pilot.", users: 1400, revenue: 1600000, pilots: 4, partnerships: 3, challenges: "Working capital.", support: "Debt funding connects.", submittedOn: "2026-07-04", submittedBy: "Karthik N" },
+    { id: "r7", period: "Q3 2026", milestones: "2,000 farms; break-even month.", users: 2000, revenue: 2100000, pilots: 4, partnerships: 4, challenges: "Hiring field staff.", support: "Intern pipeline.", submittedOn: "2026-10-03", submittedBy: "Karthik N" },
+  ],
   meetings: [],
-  bookings: [],
-  invoices: [{ id: "i9", no: "SRIIF/2026/0135", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Virtual membership", amount: 2000 }], status: "Due" }],
+  bookings: [{ id: "b9", facility: "Instrumentation lab", date: "2026-12-02", slot: "14:00–17:00", purpose: "Sensor casing tests", status: "Pending" }],
+  invoices: [{ id: "i9", no: "SRIIF/2026/0135", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Virtual membership", sac: "998599", qty: 1, rate: 2000, amount: 2000 }], status: "Due" }],
+  memberRequests: [],
 };
 
 const voice: Startup = {
@@ -132,7 +184,61 @@ const voice: Startup = {
   docs: [],
   founders: [{ name: "Meena S", designation: "Founder (student)", equity: 100, din: "" }],
   funding: [],
+  reports: [{ id: "r9", period: "Q3 2026", milestones: "Prototype voice model in Tamil.", users: 15, revenue: 0, pilots: 0, partnerships: 1, challenges: "Speech data collection.", support: "Ethics approval guidance.", submittedOn: "2026-10-08", submittedBy: "Meena S" }],
+  bookings: [],
   invoices: [],
+};
+
+
+const img = (f: string) => `${BASE}/img/${f}`;
+
+const cms: Cms = {
+  popup: {
+    enabled: true,
+    title: "Applications open: Cohort 2027-A",
+    body: "Pre-Incubation, Resident and Virtual tracks. Send your request by 10 December 2026. Demo Day 2027 is on 15 January.",
+    ctaLabel: "Apply for incubation",
+    ctaHref: "/apply",
+    version: 1,
+  },
+  kpis: [
+    { id: "k1", label: "Startups supported", value: "10+", note: "Across healthcare and deep tech" },
+    { id: "k2", label: "Revenue generated", value: "₹15 Cr", note: "By portfolio startups" },
+    { id: "k3", label: "Partnerships", value: "25+", note: "Industry, government and academia" },
+    { id: "k4", label: "Active events", value: "4", note: "Upcoming on the calendar", auto: "events" },
+  ],
+  events: [
+    { id: "e1", title: "Demo Day 2027", date: "2027-01-15", time: "10:00–17:00", place: "SRIIF Event Hall", category: "Demo Day", summary: "Startups pitch to investors and corporates.", details: "Ten SRIIF startups present to angel networks, seed funds and corporate innovation teams. Investors and partners can register to attend; startups register from their portal notice.", registerUrl: "/contact" },
+    { id: "e2", title: "IP & Legal Clinic", date: "2026-12-10", time: "14:00–17:00", place: "Meeting Room 2", category: "Clinic", summary: "One-to-one sessions with IP attorneys.", details: "Book a 30-minute slot with an empanelled patent attorney: patentability, trademarks, contracts and licensing.", registerUrl: "/contact" },
+    { id: "e3", title: "Investor Connect", date: "2027-02-28", time: "11:00–13:00", place: "Online", category: "Investor Connect", summary: "Meet angel networks and seed funds.", details: "Closed-door session where selected startups meet angel networks and seed funds.", registerUrl: "/contact" },
+    { id: "e4", title: "Founders Meetup – December", date: "2026-12-18", time: "17:30–19:30", place: "Cafeteria & Lounge", category: "Meetup", summary: "Peer learning and networking evening.", details: "Monthly evening for founders, mentors and students. Short talks followed by networking.", registerUrl: "/contact" },
+    { id: "e5", title: "HealthTech Hackathon", date: "2026-11-08", time: "09:00 (36 hrs)", place: "SRIHER Campus", category: "Hackathon", summary: "36-hour hackathon on hospital workflow problems.", details: "Students and early teams built solutions for problems shared by SRMC clinicians. Winners joined Pre-Incubation.", registerUrl: "" },
+    { id: "e6", title: "Regulatory Pathways Workshop", date: "2026-10-17", time: "10:00–13:00", place: "Board Room", category: "Workshop", summary: "CDSCO, ethics and biosafety approvals for medtech.", details: "Hands-on workshop on CDSCO medical device rules, ethics committee submissions and biosafety approvals.", registerUrl: "" },
+    { id: "e7", title: "Demo Day 2026", date: "2026-01-20", time: "10:00–17:00", place: "SRIIF Event Hall", category: "Demo Day", summary: "Cohort 2025 startups pitched to investors.", details: "Eight startups pitched; three closed follow-on meetings with investors.", registerUrl: "" },
+  ],
+  gallery: [
+    { id: "g1", title: "Demo Day 2026", date: "2026-01-20", category: "Demo days", img: img("herohome.jpg"), caption: "Cohort 2025 startups pitch to investors.", link: "" },
+    { id: "g2", title: "Regulatory Pathways Workshop", date: "2026-10-17", category: "Workshops", img: img("cowork.jpg"), caption: "CDSCO and ethics approvals workshop.", link: "" },
+    { id: "g3", title: "MoU with Startup TN", date: "2026-10-05", category: "MoU signings", img: img("sriif1.png"), caption: "SRIIF and Startup TN sign an ecosystem MoU.", link: "" },
+    { id: "g4", title: "Delegation visit to the labs", date: "2026-09-12", category: "Visitor delegations", img: img("lab.jpg"), caption: "Visiting delegation tours the instrument facility.", link: "" },
+    { id: "g5", title: "HealthTech Hackathon", date: "2026-11-08", category: "Workshops", img: img("cowork1.jpg"), caption: "Teams at work during the 36-hour hackathon.", link: "" },
+    { id: "g6", title: "Clinical facility tour", date: "2026-08-22", category: "Visitor delegations", img: img("clinical.jpg"), caption: "Industry partners visit the clinical trial facility.", link: "" },
+    { id: "g7", title: "GreenLeaf seed round in the news", date: "2026-11-02", category: "Press", img: img("incubation.jpg"), caption: "Press coverage of GreenLeaf Agritech's seed round.", link: "" },
+    { id: "g8", title: "Instrumentation lab opening", date: "2026-07-01", category: "MoU signings", img: img("instrument.jpg"), caption: "New shared instrumentation lab opened for incubatees.", link: "" },
+  ],
+  testimonials: [
+    { id: "ts1", kind: "Founder", name: "Karthik N", role: "Founder", org: "GreenLeaf Agritech", quote: "SRIIF gave us a lab, mentors and our first pilot farms. We went from a campus prototype to 2,000 farmers in two years.", stat: "2,000 farms" },
+    { id: "ts2", kind: "Founder", name: "Priya Raman", role: "CEO & Co-founder", org: "CareLoop Health", quote: "Hospital access and clinical mentors let us run a real pilot within months of joining.", stat: "120-patient pilot" },
+    { id: "ts3", kind: "Founder", name: "Meena S", role: "Founder", org: "VoiceBridge AI", quote: "As a student founder, Pre-Incubation helped me validate the idea before writing any code.", stat: "TRL 2 to prototype" },
+    { id: "ts4", kind: "Partner", name: "Partnerships team", role: "Ecosystem partner", org: "MedTech Council", quote: "SRIIF startups come to us with clinical evidence and clean compliance records, which makes pilots easy to start.", stat: "6 pilots" },
+  ],
+  board: [
+    { id: "bd1", name: "To be announced", role: "Chairperson, Board of Directors", bio: "Senior SRIHER leadership.", img: "" },
+    { id: "bd2", name: "To be announced", role: "Academic advisor", bio: "Faculty representative from SRIHER research.", img: "" },
+    { id: "bd3", name: "To be announced", role: "Industry advisor", bio: "Healthcare and medtech industry leader.", img: "" },
+    { id: "bd4", name: "To be announced", role: "Investment advisor", bio: "Angel and venture investment expertise.", img: "" },
+  ],
+  social: { linkedin: "", x: "", instagram: "", youtube: "" },
 };
 
 export const seed: DB = {
@@ -148,7 +254,7 @@ export const seed: DB = {
   startups: [careloop, greenleaf, voice],
   tickets: [
     {
-      id: "t1", no: "TCK-1001", startupId: "s1", raisedBy: "Priya Raman", category: "Facilities", subject: "AC not working in cabin 3", priority: "Normal", status: "In progress", created: "2026-11-18",
+      id: "t1", no: "TCK-1001", startupId: "s1", raisedBy: "Priya Raman", category: "Facility maintenance", subject: "AC not working in cabin 3", priority: "Normal", status: "In progress", created: "2026-11-18",
       messages: [
         { by: "Priya Raman", role: "startup", text: "AC in cabin 3 stopped working since morning.", at: "2026-11-18 10:12" },
         { by: "Lakshmi", role: "admin", text: "Raised with estate team. Technician visiting tomorrow.", at: "2026-11-18 12:40" },
@@ -168,5 +274,20 @@ export const seed: DB = {
     { id: "n2", title: "Q4 progress report due", body: "Submit your Q4 2026 progress report by 10 Jan 2027.", date: "2026-11-15" },
   ],
   audit: [{ at: "2026-11-20 10:00", by: "Lakshmi", action: "Logged onboarding request from OrthoPrint" }],
-  facilities: ["Co-working Space", "Board Room", "Instrument Facility (wet lab)", "Clinical testing lab", "Instrumentation lab", "Hospital access (on request)"],
+  facilities: Object.keys(FACILITY_RULES),
+  blocks: [
+    { id: "bl1", facility: "Board Room", date: "2026-12-04", slot: "Full day", kind: "External event", reason: "SRIHER research council meeting" },
+    { id: "bl2", facility: "Instrument Facility (wet lab)", date: "2026-12-01", slot: "Full day", kind: "Maintenance", reason: "Annual freezer servicing" },
+  ],
+  messages: [
+    { id: "msg1", startupId: "s1", by: "Lakshmi", role: "admin", text: "Hi Priya, please share the signed hospital pilot MoU when ready so we can add it to your records.", at: "2026-11-21 11:05", read: true },
+    { id: "msg2", startupId: "s1", by: "Priya Raman", role: "startup", text: "Sure, the legal team is reviewing it. Expect it by next Friday.", at: "2026-11-21 15:40", read: true },
+    { id: "msg3", startupId: "s1", by: "Lakshmi", role: "admin", text: "Thanks. Also, your Demo Day slot is confirmed for 15 Jan.", at: "2026-11-24 10:12", read: false },
+    { id: "msg4", startupId: "s2", by: "Karthik N", role: "startup", text: "Can we use the event hall for a farmer workshop in January?", at: "2026-11-25 09:20", read: false },
+  ],
+  inquiries: [
+    { id: "iq1", kind: "Contact", type: "Corporate partnership", name: "Ramesh K", email: "ramesh@medcorp.example.com", phone: "", org: "MedCorp India", message: "We would like to run a diagnostics innovation challenge with SRIIF startups.", at: "2026-11-23 16:02", status: "New" },
+    { id: "iq2", kind: "Join Us", type: "Mentor", name: "Dr. Farah Ali", email: "farah@example.com", phone: "", org: "Independent", message: "20 years in medical device regulation. Happy to mentor on CDSCO pathways.", at: "2026-11-19 12:30", status: "Replied" },
+  ],
+  cms,
 };

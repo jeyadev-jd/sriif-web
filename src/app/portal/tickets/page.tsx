@@ -6,7 +6,7 @@ import { PageTitle } from "@/components/ui";
 export default function Page() {
   return (
     <>
-      <PageTitle title="Support tickets" sub="Raise issues to SRIIF admins: facilities, billing, mentors, documents, team changes." />
+      <PageTitle title="Support tickets" sub="Raise and track issues: IT, facility maintenance, compliance and admin queries." />
       <Tickets mode="startup" />
     </>
   );

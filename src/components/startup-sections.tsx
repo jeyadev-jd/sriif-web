@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus, Trash2 } from "lucide-react";
+import { Check, FileText, Plus, Upload } from "lucide-react";
 
 // The eight sections of the "startup login" sheet. Each one is used by:
 //  - the startup portal (mode "startup": own data only),
@@ -9,11 +9,13 @@ import { Check, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, type ReactNode } from "react";
-import { DOC_TYPES, SECTORS } from "@/lib/seed";
+import { DOC_TYPES, FACILITY_RULES, SECTORS, SLOTS } from "@/lib/seed";
+import { slotConflict } from "@/lib/facility";
 import { brand } from "@/lib/site";
 import { daysUntil, fmtDate, inr, invoiceTotals, today, uid, useStore } from "@/lib/store";
-import type { Award, FundingEntry, Startup } from "@/lib/types";
-import { Badge, Button, Card, Empty, Field, Modal, readFile, ReadOnlyNote, Stat, Table } from "./ui";
+import type { Award, Booking, FundingEntry, InvoiceLine, Startup } from "@/lib/types";
+import { LineEditor, LineTable } from "./invoice-editor";
+import { Badge, Button, Card, cx, Empty, Field, Modal, readFile, ReadOnlyNote, Stat, Table } from "./ui";
 
 export type Mode = "startup" | "admin" | "mentor";
 type P = { s: Startup; mode: Mode };
@@ -47,7 +49,7 @@ export function ProfileSection({ s, mode }: P) {
     edit((x) => {
       Object.assign(x, {
         name: f.name, logo: f.logo, trl: Number(f.trl), sectors: f.sectors, stage: f.stage, website: f.website, linkedin: f.linkedin,
-        regAddress: f.regAddress, commAddress: f.commAddress, email: f.email, phone: f.phone, oneLiner: f.oneLiner,
+        regAddress: f.regAddress, commAddress: f.commAddress, email: f.email, phone: f.phone, oneLiner: f.oneLiner, gstin: f.gstin.toUpperCase(),
       });
       if (mode === "admin") Object.assign(x, { program: f.program, cohort: f.cohort, onboardedOn: f.onboardedOn, status: f.status, equityTaken: f.equityTaken });
     }, "Updated startup profile");
@@ -56,8 +58,8 @@ export function ProfileSection({ s, mode }: P) {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-      <Card title="Startup profile" action={<Link className="text-sm font-semibold text-brand underline" href={`/print/profile?sid=${s.id}`} target="_blank">Startup Profile PDF</Link>}>
+    <div className="grid items-start gap-6 lg:grid-cols-[1fr_280px]">
+      <Card className="lg:row-span-2" title="Startup profile" action={<Link className="text-sm font-semibold text-brand underline" href={`/print/profile?sid=${s.id}`} target="_blank">Startup Profile PDF</Link>}>
         {!canEdit && <ReadOnlyNote>Read-only view.</ReadOnlyNote>}
         <fieldset disabled={!canEdit} className="grid gap-4 md:grid-cols-2">
           <Field label="Startup name (as per incorporation)" className="md:col-span-2"><input className="field" {...bind("name")} /></Field>
@@ -85,6 +87,7 @@ export function ProfileSection({ s, mode }: P) {
           <Field label="Communication address"><textarea className="field" {...bind("commAddress")} /></Field>
           <Field label="Startup email"><input className="field" type="email" {...bind("email")} /></Field>
           <Field label="Startup phone"><input className="field" {...bind("phone")} /></Field>
+          <Field label="GSTIN" hint="Printed on your tax invoices"><input className="field uppercase" pattern="[0-9]{2}[A-Za-z0-9]{13}" {...bind("gstin")} /></Field>
           {mode === "admin" && (
             <label className="flex items-center gap-2 text-sm md:col-span-2"><input type="checkbox" checked={f.equityTaken} onChange={(e) => setF({ ...f, equityTaken: e.target.checked })} /> SRIIF holds equity in this startup (enables section 3 – cap table)</label>
           )}
@@ -106,9 +109,46 @@ export function ProfileSection({ s, mode }: P) {
             }} />
           </label>
         )}
+        {canEdit && f.logo !== s.logo && <p className="mt-2 text-xs text-amber-700">Click “Save profile” to keep the new logo.</p>}
         <p className="mt-4 text-xs text-slate-500">Seat: {s.seat.type} × {s.seat.count} at {inr(s.seat.rate)}/month each.</p>
       </Card>
+      <PitchDeck s={s} canEdit={canEdit} />
     </div>
+  );
+}
+
+/** Pitch deck: always one current version; replacing keeps the history. */
+function PitchDeck({ s, canEdit }: { s: Startup; canEdit: boolean }) {
+  const edit = useEdit(s);
+  const d = s.pitchDeck;
+  return (
+    <Card title="Pitch deck" className="lg:col-start-2">
+      {d ? (
+        <div className="flex items-start gap-3 rounded-lg bg-surface p-3">
+          <FileText size={28} className="shrink-0 text-brand" aria-hidden />
+          <div className="min-w-0 text-sm"><p className="truncate font-semibold text-slate-900">{d.name}</p><p className="text-xs text-slate-500">Version {d.version} · {fmtDate(d.uploadedOn)}</p></div>
+        </div>
+      ) : <p className="text-sm text-slate-500">No pitch deck uploaded yet.</p>}
+      {canEdit && (
+        <label className="mt-3 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark">
+          <Upload size={16} aria-hidden />{d ? "Replace pitch deck" : "Upload pitch deck"}
+          <input type="file" accept="application/pdf" className="sr-only" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            edit((x) => {
+              const prev = x.pitchDeck;
+              x.pitchDeck = { name: file.name, version: (prev?.version ?? 0) + 1, uploadedOn: today(), history: prev ? [{ name: prev.name, version: prev.version, uploadedOn: prev.uploadedOn }, ...prev.history] : [] };
+            }, "Uploaded pitch deck");
+            e.target.value = "";
+          }} />
+        </label>
+      )}
+      {d && d.history.length > 0 && (
+        <details className="mt-3 text-xs text-slate-600"><summary className="cursor-pointer font-semibold">Earlier versions ({d.history.length})</summary>
+          <ul className="mt-2 space-y-1">{d.history.map((h) => <li key={h.version}>v{h.version} · {h.name} · {fmtDate(h.uploadedOn)}</li>)}</ul>
+        </details>
+      )}
+    </Card>
   );
 }
 
@@ -463,32 +503,42 @@ export function MentorshipSection({ s, mode }: P) {
 export function FacilitiesSection({ s, mode }: P) {
   const { db } = useStore();
   const edit = useEdit(s);
+  const allowed = db.facilities.filter((x) => (FACILITY_RULES[x] ?? []).includes(s.program));
   const [open, setOpen] = useState(false);
-  const { f, bind } = useForm({ facility: db.facilities[0], date: "", slot: "10:00–12:00", purpose: "" });
-  const clash = s.bookings.some((b) => b.facility === f.facility && b.date === f.date && b.slot === f.slot && b.status !== "Rejected");
+  const { f, setF, bind } = useForm({ facility: allowed[0] ?? "", date: "", slot: SLOTS[1], purpose: "" });
+  const conflict = f.date ? slotConflict(db, f.facility, f.date, f.slot) : null;
+  const notAllowed = db.facilities.filter((x) => !allowed.includes(x));
+  const set = (id: string, status: Booking["status"], what: string) => edit((x) => { x.bookings.find((y) => y.id === id)!.status = status; }, `${what} booking`);
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Seat type" value={s.seat.type} />
-        <Stat label="Seats" value={s.seat.count} />
+        <Stat label="Incubation tier" value={s.program.replace(" Incubation", "")} note={s.program === "Virtual Incubation" ? "No physical seat" : "On-campus access"} />
+        <Stat label="Seat allocation" value={`${s.seat.type} × ${s.seat.count}`} note="Allocated by SRIIF" />
         <Stat label="Access card" value={s.status === "Active" ? "Active" : "Revoked"} note="Issued by SRIIF office" />
       </div>
-      <Card title="Facility bookings" action={mode === "startup" && <Button size="sm" onClick={() => setOpen(true)}>+ Book facility</Button>}>
+      <Card title="Facility bookings" action={mode === "startup" && <Button size="sm" className="min-h-10" onClick={() => setOpen(true)}>+ Book facility</Button>}>
         <Table head={["Date", "Facility", "Slot", "Purpose", "Status", ""]} rows={[...s.bookings].sort((a, b) => b.date.localeCompare(a.date)).map((b) => [
-          fmtDate(b.date), b.facility, b.slot, b.purpose, <Badge key="s">{b.status}</Badge>,
-          mode === "admin" && b.status === "Pending" ? <span key="a" className="flex gap-1"><Button size="sm" onClick={() => edit((x) => { x.bookings.find((y) => y.id === b.id)!.status = "Approved"; }, `Approved booking ${b.facility}`)}>Approve</Button><Button size="sm" variant="outline" onClick={() => edit((x) => { x.bookings.find((y) => y.id === b.id)!.status = "Rejected"; }, `Rejected booking ${b.facility}`)}>Reject</Button></span> : null,
+          fmtDate(b.date), b.facility, b.slot, <span key="p">{b.purpose}{b.byAdmin && <span className="block text-xs text-slate-500">Allocated by SRIIF</span>}</span>, <Badge key="s">{b.status}</Badge>,
+          mode === "admin" && b.status === "Pending" ? <span key="a" className="flex gap-1"><Button size="sm" onClick={() => set(b.id, "Approved", "Approved")}>Approve</Button><Button size="sm" variant="outline" onClick={() => set(b.id, "Rejected", "Rejected")}>Reject</Button></span>
+            : mode === "startup" && (b.status === "Pending" || b.status === "Approved") && b.date >= today() ? <button key="c" className="min-h-10 text-xs text-red-700 underline" onClick={() => set(b.id, "Cancelled", "Cancelled")}>Cancel</button> : null,
         ])} />
+        {mode === "startup" && notAllowed.length > 0 && <p className="mt-3 text-xs text-slate-500">Not included in {s.program}: {notAllowed.join(", ")}. Raise a ticket if you need them.</p>}
       </Card>
       <Modal open={open} onClose={() => setOpen(false)} title="Book a facility">
-        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); if (clash) return; edit((x) => { x.bookings.push({ id: uid(), ...f, status: "Pending" }); }, `Requested booking ${f.facility}`); setOpen(false); }}>
-          <Field label="Facility"><select className="field" {...bind("facility")}>{db.facilities.map((x) => <option key={x}>{x}</option>)}</select></Field>
+        <form className="grid gap-3" onSubmit={(e) => { e.preventDefault(); if (conflict) return; edit((x) => { x.bookings.push({ id: uid(), ...f, status: "Pending" }); }, `Requested booking ${f.facility}`); setF({ ...f, date: "", purpose: "" }); setOpen(false); }}>
+          <Field label="Facility" hint={`Facilities available to ${s.program}`}><select className="field" {...bind("facility")}>{allowed.map((x) => <option key={x}>{x}</option>)}</select></Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Date"><input className="field" type="date" min={today()} required {...bind("date")} /></Field>
-            <Field label="Slot"><select className="field" {...bind("slot")}>{["09:00–10:00", "10:00–12:00", "12:00–14:00", "14:00–17:00", "Full day"].map((x) => <option key={x}>{x}</option>)}</select></Field>
+            <Field label="Slot"><select className="field" {...bind("slot")}>{SLOTS.map((x) => <option key={x}>{x}</option>)}</select></Field>
           </div>
+          {f.date && (
+            <div className="flex flex-wrap gap-1.5" aria-label="Slot availability">
+              {SLOTS.map((sl) => { const c = slotConflict(db, f.facility, f.date, sl); return <button type="button" key={sl} onClick={() => setF({ ...f, slot: sl })} title={c ?? "Free"} className={cx("min-h-9 rounded-full px-3 text-xs font-medium ring-1", f.slot === sl ? "bg-brand text-white ring-brand" : c ? "bg-slate-100 text-slate-400 line-through ring-slate-200" : "bg-emerald-50 text-emerald-800 ring-emerald-200")}>{sl}</button>; })}
+            </div>
+          )}
           <Field label="Purpose"><input className="field" required {...bind("purpose")} /></Field>
-          {clash && <p className="text-sm text-red-600">You already have this slot booked.</p>}
-          <Button type="submit" disabled={clash}>Request booking</Button>
+          {conflict && <p className="text-sm text-red-700" role="alert">This slot is not available. {conflict}.</p>}
+          <Button type="submit" disabled={!!conflict || !f.facility}>Request booking</Button>
           <p className="text-xs text-slate-500">SRIIF approves each booking. Lab usage is added to your monthly invoice.</p>
         </form>
       </Modal>
@@ -501,26 +551,37 @@ export function InvoicesSection({ s, mode }: P) {
   const edit = useEdit(s);
   const [pay, setPay] = useState<string | null>(null);
   const [utr, setUtr] = useState("");
-  const [newOpen, setNewOpen] = useState(false);
-  const [lines, setLines] = useState([{ label: `${s.seat.type} × ${s.seat.count}`, amount: s.seat.rate * s.seat.count }]);
-  const [period, setPeriod] = useState(new Date().toLocaleDateString("en-IN", { month: "short", year: "numeric" }));
+  const [view, setView] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | "new" | null>(null);
+  const seatLine = (): InvoiceLine => ({ label: s.seat.type, sac: "997212", qty: s.seat.count, rate: s.seat.rate, amount: s.seat.rate * s.seat.count });
+  const [lines, setLines] = useState<InvoiceLine[]>([seatLine()]);
+  const [period, setPeriod] = useState("");
   if (mode === "mentor") return <Empty>Not available for mentors.</Empty>;
   const shown = (i: Startup["invoices"][number]) => i.status === "Due" && i.utr ? "Pending" : i.status === "Due" && i.due < today() ? "Overdue" : i.status;
   const due = s.invoices.filter((i) => i.status === "Due").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
+  const paid = s.invoices.filter((i) => i.status === "Paid").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
+  const viewing = s.invoices.find((i) => i.id === view);
+  const openEditor = (id: string | "new") => {
+    const i = s.invoices.find((x) => x.id === id);
+    setLines(i ? structuredClone(i.lines) : [seatLine()]);
+    setPeriod(i?.period ?? new Date().toLocaleDateString("en-IN", { month: "short", year: "numeric" }));
+    setEditing(id);
+  };
 
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Outstanding" value={inr(due)} />
-        <Stat label="Invoices" value={s.invoices.length} />
-        <Stat label="Monthly rent" value={inr(s.seat.rate * s.seat.count)} note="+ 18% GST" />
+        <Stat label="Outstanding" value={inr(due)} tone={due ? "amber" : "green"} />
+        <Stat label="Paid to date" value={inr(paid)} />
+        <Stat label="Monthly rent" value={inr(s.seat.rate * s.seat.count)} note={`+ ${brand.gstRate * 100}% GST (CGST + SGST)`} />
       </div>
-      <Card title="Monthly invoices" action={mode === "admin" && <Button size="sm" onClick={() => setNewOpen(true)}>+ Raise invoice</Button>}>
-        <Table head={["Invoice", "Period", "Due", "Total (incl. GST)", "Status", "Documents", ""]} rows={[...s.invoices].reverse().map((i) => {
+      {!s.gstin && mode === "startup" && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Add your GSTIN in Profile & pitch deck so it is printed on your tax invoices.</p>}
+      <Card title="Invoices" action={mode === "admin" && <Button size="sm" className="min-h-10" onClick={() => openEditor("new")}>+ Raise invoice</Button>}>
+        <Table head={["Invoice", "Period", "Due", "Taxable", "GST", "Total", "Status", "Documents", ""]} rows={[...s.invoices].reverse().map((i) => {
           const t = invoiceTotals(i.lines, brand.gstRate);
           const st = shown(i);
           return [
-            i.no, i.period, fmtDate(i.due), inr(t.total), <Badge key="b">{st}</Badge>,
+            <button key="n" className="min-h-10 font-medium text-brand underline" onClick={() => setView(i.id)}>{i.no}</button>, i.period, fmtDate(i.due), inr(t.sub), inr(t.gst), <b key="t">{inr(t.total)}</b>, <Badge key="b">{st}</Badge>,
             <span key="d" className="flex flex-col text-xs">
               <Link className="text-brand underline" href={`/print/invoice?sid=${s.id}&iid=${i.id}`} target="_blank">Invoice PDF</Link>
               {i.status === "Paid" && <Link className="text-brand underline" href={`/print/receipt?sid=${s.id}&iid=${i.id}`} target="_blank">Receipt PDF</Link>}
@@ -531,7 +592,8 @@ export function InvoicesSection({ s, mode }: P) {
               {mode === "admin" && i.status === "Due" && (
                 <span className="flex flex-col gap-1">
                   {i.utr && <span className="text-xs">UTR: {i.utr}</span>}
-                  <Button size="sm" onClick={() => edit((x) => { const y = x.invoices.find((z) => z.id === i.id)!; y.status = "Paid"; y.paidOn = today(); y.receiptNo = "RCPT-" + y.no.split("/").pop(); }, `Marked ${i.no} paid`)}>Mark paid</Button>
+                  <Button size="sm" onClick={() => edit((x) => { const y = x.invoices.find((z) => z.id === i.id)!; y.status = "Paid"; y.paidOn = today(); y.receiptNo = "RCPT-" + y.no.split("/").pop(); }, `Marked ${i.no} paid`)}>{i.utr ? "Verify & mark paid" : "Mark paid"}</Button>
+                  {!i.utr && <Button size="sm" variant="outline" onClick={() => openEditor(i.id)}>Edit</Button>}
                   <Button size="sm" variant="outline" onClick={() => edit((x) => { x.invoices.find((z) => z.id === i.id)!.status = "Waived"; }, `Waived ${i.no}`)}>Waive</Button>
                 </span>
               )}
@@ -539,6 +601,18 @@ export function InvoicesSection({ s, mode }: P) {
           ];
         })} />
       </Card>
+      <Modal wide open={!!viewing} onClose={() => setView(null)} title={viewing ? `Invoice ${viewing.no}` : ""}>
+        {viewing && (
+          <div className="grid gap-4">
+            <div className="grid gap-2 text-sm sm:grid-cols-3">
+              <p><span className="block text-xs text-slate-500">Billed to</span>{s.name}<span className="block text-xs text-slate-500">GSTIN: {s.gstin || "not provided"}</span></p>
+              <p><span className="block text-xs text-slate-500">Issued · due</span>{fmtDate(viewing.issued)} · {fmtDate(viewing.due)}</p>
+              <p><span className="block text-xs text-slate-500">Status</span><Badge>{shown(viewing)}</Badge>{viewing.paidOn && <span className="block text-xs text-slate-500">Paid {fmtDate(viewing.paidOn)} · {viewing.receiptNo}</span>}</p>
+            </div>
+            <LineTable lines={viewing.lines} />
+          </div>
+        )}
+      </Modal>
       <Modal open={!!pay} onClose={() => setPay(null)} title="Pay invoice">
         <div className="grid gap-3 text-sm">
           <p>Pay by UPI or bank transfer to <b>SRIIF</b>, then enter the transaction reference (UTR). SRIIF verifies it and issues the receipt.</p>
@@ -547,63 +621,28 @@ export function InvoicesSection({ s, mode }: P) {
           <Button disabled={utr.trim().length < 6} onClick={() => { edit((x) => { x.invoices.find((z) => z.id === pay)!.utr = utr.trim(); }, "Submitted payment reference"); setPay(null); }}>Submit payment reference</Button>
         </div>
       </Modal>
-      <Modal open={newOpen} onClose={() => setNewOpen(false)} title="Raise monthly invoice">
+      <Modal wide open={!!editing} onClose={() => setEditing(null)} title={editing === "new" ? "Raise invoice" : "Edit invoice"}>
         <div className="grid gap-3">
-          <Field label="Period"><input className="field" value={period} onChange={(e) => setPeriod(e.target.value)} /></Field>
-          {lines.map((l, i) => (
-            <div key={i} className="grid grid-cols-[1fr_120px_auto] gap-2">
-              <input className="field" value={l.label} onChange={(e) => setLines(lines.map((y, j) => j === i ? { ...y, label: e.target.value } : y))} />
-              <input className="field" type="number" value={l.amount} onChange={(e) => setLines(lines.map((y, j) => j === i ? { ...y, amount: Number(e.target.value) } : y))} />
-              <button aria-label="Remove line" className="flex h-11 w-11 items-center justify-center rounded-lg text-red-600 hover:bg-red-50" onClick={() => setLines(lines.filter((_, j) => j !== i))}><Trash2 size={16} aria-hidden /></button>
-            </div>
-          ))}
-          <Button variant="ghost" size="sm" onClick={() => setLines([...lines, { label: "Lab usage", amount: 0 }])}>+ Line</Button>
-          <p className="text-sm">Total with GST: <b>{inr(invoiceTotals(lines, brand.gstRate).total)}</b></p>
-          <Button onClick={() => {
-            const n = String(Date.now()).slice(-4);
-            const issued = today();
-            const due = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
-            edit((x) => { x.invoices.push({ id: uid(), no: `SRIIF/${new Date().getFullYear()}/${n}`, period, issued, due, lines, status: "Due" }); }, `Raised invoice for ${period}`);
-            setNewOpen(false);
-          }}>Raise invoice</Button>
+          <Field label="Billing period"><input className="field" value={period} onChange={(e) => setPeriod(e.target.value)} /></Field>
+          <LineEditor lines={lines} onChange={setLines} />
+          <Button disabled={lines.length === 0} onClick={() => {
+            if (editing === "new") {
+              const n = String(Date.now()).slice(-4);
+              const issued = today();
+              const dueOn = new Date(Date.now() + 10 * 864e5).toISOString().slice(0, 10);
+              edit((x) => { x.invoices.push({ id: uid(), no: `SRIIF/${new Date().getFullYear()}/${n}`, period, issued, due: dueOn, lines, status: "Due" }); }, `Raised invoice for ${period}`);
+            } else {
+              edit((x) => { const y = x.invoices.find((z) => z.id === editing)!; y.lines = lines; y.period = period; }, `Edited invoice for ${period}`);
+            }
+            setEditing(null);
+          }}>{editing === "new" ? "Raise invoice" : "Save changes"}</Button>
         </div>
       </Modal>
     </div>
   );
 }
 
-/* ───────────── Team (admin manages; startup read-only) ───────────── */
-export function TeamSection({ s, mode }: P) {
-  const { db, update } = useStore();
-  const members = db.users.filter((u) => u.startupId === s.id);
-  const [open, setOpen] = useState(false);
-  const { f, setF, bind } = useForm({ name: "", email: "", phone: "", designation: "" });
-  const emailTaken = db.users.some((u) => u.email.toLowerCase() === f.email.trim().toLowerCase());
-  return (
-    <Card title="Team members" action={mode === "admin" && <Button size="sm" onClick={() => setOpen(true)}>+ Add member</Button>}>
-      {mode === "startup" && <ReadOnlyNote>Only SRIIF admins can add or remove team members. Need a change? Raise a support ticket.</ReadOnlyNote>}
-      <Table head={["Name", "Designation", "Email", "Phone", "Login", ""]} rows={members.map((u) => [
-        u.name, u.designation, u.email, u.phone, <Badge key="b" tone={u.active ? "green" : "slate"}>{u.active ? "Active" : "Disabled"}</Badge>,
-        mode === "admin" ? <button key="t" className="text-xs text-brand underline" onClick={() => update((d) => { const x = d.users.find((y) => y.id === u.id)!; x.active = !x.active; }, `${u.active ? "Disabled" : "Enabled"} login for ${u.name}`)}>{u.active ? "Disable login" : "Enable login"}</button> : null,
-      ])} />
-      <Modal open={open} onClose={() => setOpen(false)} title={`Add member to ${s.name}`}>
-        <form className="grid gap-3" onSubmit={(e) => {
-          e.preventDefault();
-          if (emailTaken) return;
-          update((d) => { d.users.push({ id: uid(), ...f, email: f.email.trim(), role: "startup", startupId: s.id, active: true }); }, `Added ${f.name} to ${s.name}`);
-          setF({ name: "", email: "", phone: "", designation: "" });
-          setOpen(false);
-        }}>
-          <Field label="Name"><input className="field" required {...bind("name")} /></Field>
-          <Field label="Designation"><input className="field" required {...bind("designation")} /></Field>
-          <Field label="Email (login ID)"><input className="field" type="email" required {...bind("email")} />{emailTaken && <span className="text-xs text-red-600">This email already has an account.</span>}</Field>
-          <Field label="Mobile"><input className="field" pattern="[6-9][0-9]{9}" required {...bind("phone")} /></Field>
-          <Button type="submit" disabled={emailTaken}>Add & send login invite</Button>
-        </form>
-      </Modal>
-    </Card>
-  );
-}
+export { TeamSection } from "./team-section";
 
 /* ───────────── Letters & reports (Excel "Home" sheet PDFs) ───────────── */
 export function LettersSection({ s }: { s: Startup }) {

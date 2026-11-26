@@ -97,7 +97,7 @@ function Doc() {
           <p className="mt-4">Dear {team[0]?.name ?? "Founder"},</p>
           <p className="mt-2">We are pleased to offer <b>{s.name}</b> admission to the <b>{s.program}</b> programme of {brand.fullName}, as part of <b>{s.cohort}</b>, starting <b>{fmtDate(s.onboardedOn)}</b>.</p>
           <H>Terms</H>
-          <KV rows={[["Space", `${s.seat.type} × ${s.seat.count}`], ["Rent", `${inr(s.seat.rate)} per seat per month + GST @ ${brand.gstRate * 100}%`], ["Duration", s.program === "Pre-Incubation" ? "3 months" : s.program === "Virtual Incubation" ? "12 months" : "24 months, reviewed after 18 months and every 12 months thereafter"], ["Equity", s.equityTaken ? "As per the incubation agreement" : "Not applicable"], ["Reporting", "Quarterly progress report and annual review"]]} />
+          <KV rows={[["Space", `${s.seat.type} × ${s.seat.count}`], ["Rent", `${inr(s.seat.rate)} per seat per month + GST @ ${brand.gstRate * 100}%`], ["Duration", s.program === "Pre-Incubation" ? "3 months" : "6 months, extendable on review"], ["Equity", s.equityTaken ? "As per the incubation agreement" : "Not applicable"], ["Reporting", "Quarterly progress report and annual review"]]} />
           <p className="mt-4">This offer is subject to signing the Incubation Agreement and NDA and submitting the mandatory documents within 30 days.</p>
           <Sign />
         </Sheet>
@@ -122,13 +122,14 @@ function Doc() {
       const t = invoiceTotals(i.lines, brand.gstRate);
       return (
         <Sheet title={kind === "invoice" ? "Tax invoice" : "Payment receipt"} sub={kind === "invoice" ? `${i.no} · ${i.period}` : `${i.receiptNo} · against ${i.no}`}>
-          <KV rows={[["Billed to", `${s.name}, ${s.regAddress}`], ["Issued", fmtDate(i.issued)], ["Due", fmtDate(i.due)], ...(kind === "receipt" ? [["Paid on", fmtDate(i.paidOn)], ["Reference (UTR)", i.utr ?? "—"]] as [string, string][] : [])]} />
-          <table className="mt-6 w-full text-sm"><thead><tr className="border-b-2 text-left"><th className="py-1">Description</th><th className="py-1 text-right">Amount</th></tr></thead>
+          <KV rows={[["Supplier", `${brand.fullName}, ${brand.address}`], ["Billed to", `${s.name}, ${s.regAddress}`], ["Recipient GSTIN", s.gstin || "Unregistered"], ["Place of supply", "Tamil Nadu (33)"], ["Issued", fmtDate(i.issued)], ["Due", fmtDate(i.due)], ...(kind === "receipt" ? [["Paid on", fmtDate(i.paidOn)], ["Reference (UTR)", i.utr ?? "—"]] as [string, string][] : [])]} />
+          <table className="mt-6 w-full text-sm"><thead><tr className="border-b-2 text-left"><th className="py-1">Description</th><th className="py-1">SAC</th><th className="py-1 text-right">Qty</th><th className="py-1 text-right">Rate</th><th className="py-1 text-right">Amount</th></tr></thead>
             <tbody>
-              {i.lines.map((l, k) => <tr key={k} className="border-b"><td className="py-1">{l.label}</td><td className="py-1 text-right">{inr(l.amount)}</td></tr>)}
-              <tr><td className="py-1 text-right">Subtotal</td><td className="py-1 text-right">{inr(t.sub)}</td></tr>
-              <tr><td className="py-1 text-right">GST @ {brand.gstRate * 100}%</td><td className="py-1 text-right">{inr(t.gst)}</td></tr>
-              <tr className="font-bold"><td className="py-1 text-right">{kind === "invoice" ? "Total payable" : "Amount received"}</td><td className="py-1 text-right">{inr(t.total)}</td></tr>
+              {i.lines.map((l, k) => <tr key={k} className="border-b"><td className="py-1">{l.label}</td><td className="py-1">{l.sac ?? "—"}</td><td className="py-1 text-right">{l.qty ?? 1}</td><td className="py-1 text-right">{inr(l.rate ?? l.amount)}</td><td className="py-1 text-right">{inr(l.amount)}</td></tr>)}
+              <tr><td colSpan={4} className="py-1 text-right">Taxable value</td><td className="py-1 text-right">{inr(t.sub)}</td></tr>
+              <tr><td colSpan={4} className="py-1 text-right">CGST @ {brand.gstRate * 50}%</td><td className="py-1 text-right">{inr(t.cgst)}</td></tr>
+              <tr><td colSpan={4} className="py-1 text-right">SGST @ {brand.gstRate * 50}%</td><td className="py-1 text-right">{inr(t.sgst)}</td></tr>
+              <tr className="font-bold"><td colSpan={4} className="py-1 text-right">{kind === "invoice" ? "Total payable" : "Amount received"}</td><td className="py-1 text-right">{inr(t.total)}</td></tr>
             </tbody></table>
           {kind === "receipt" && <p className="mt-8 text-center text-lg font-bold text-emerald-700">PAID</p>}
         </Sheet>

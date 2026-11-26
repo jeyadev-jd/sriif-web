@@ -9,7 +9,7 @@ export default function Page() {
   if (!s) return null;
   return (
     <>
-      <PageTitle title="Invoices & payments" sub="Monthly invoices with 18% GST. Pay and submit your UTR." />
+      <PageTitle title="Invoices & billing" sub="Itemised tax invoices (CGST + SGST), payment status and PDF receipts." />
       <InvoicesSection s={s} mode="startup" />
     </>
   );

@@ -97,3 +97,36 @@ src/app/print       printable documents (offer letter, agreement, invoice, recei
 src/components      shared UI, portal sections, tickets
 src/lib             site content, data model, demo store, seed data, navigation
 ```
+
+## Run with the database (local)
+
+The public demo on GitHub Pages keeps data in the browser. Locally the app can run against PostgreSQL through Prisma, with real logins and access rules enforced on the server.
+
+Needs Node 22+ and Docker.
+
+```bash
+cp .env.example .env          # then set SESSION_SECRET (openssl rand -hex 32)
+npm install                   # also generates the Prisma client
+npm run setup                 # starts Postgres in Docker, creates tables, loads demo data
+npm run dev                   # http://localhost:3000
+```
+
+Log in with a demo email (admin@sriif.in, priya@careloop.example.in). There is no mail service yet: the OTP is printed in the `npm run dev` terminal, or is `DEV_OTP` from `.env` (123456 by default). Leave `DEV_OTP` empty to get random codes.
+
+Useful commands:
+
+| Command | What it does |
+| --- | --- |
+| `npm run db:studio` | Browse and edit tables in Prisma Studio |
+| `npx prisma migrate dev --name <change>` | After editing `prisma/schema.prisma` |
+| `npx prisma migrate reset` | Wipe the local database and reseed (asks first) |
+| `docker compose down` | Stop Postgres (data is kept in the `pgdata` volume) |
+
+How it fits together:
+
+- `prisma/schema.prisma`: tables mirror `src/lib/types.ts` (startups with documents, funding, reports, bookings and invoices in their own tables; users; tickets; messages; website content as settings).
+- `src/app/api/*/route.api.ts`: login by email OTP (signed, http-only cookie), and `/api/state` to read and save. The `.api.ts` name keeps these routes out of the static GitHub Pages export.
+- `src/server/sync.ts`: access rules. Each role only receives its own data (a startup sees its own startup; other startups appear only as anonymous facility bookings). Saves send the state the browser last received plus its edits; the server applies only what that role may change: startups cannot approve bookings, change invoices beyond adding a payment reference, set KYC status or edit program, status, seat or mentors. Visitors can only send Contact and Join Us forms (rate limited).
+- `NEXT_PUBLIC_API=1` in `.env` switches the browser store from local storage to the API.
+
+Not done yet: sending OTP emails (needs an SMTP or email API account), file storage outside the database (uploads are stored as data in Postgres for now), and hosting.

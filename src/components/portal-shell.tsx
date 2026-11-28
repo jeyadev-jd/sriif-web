@@ -50,7 +50,7 @@ function badges(db: DB, user: User): Record<string, number> {
 const ROLE_LABEL: Record<Role, string> = { admin: "Admin console", startup: "Startup portal", mentor: "Startup portal" };
 
 export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[]; children: ReactNode }) {
-  const { ready, user, logout, db } = useStore();
+  const { ready, user, logout, db, error, clearError } = useStore();
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -142,6 +142,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
           <Link href="/" className="hidden text-sm font-medium text-slate-600 hover:text-brand sm:block">Public site</Link>
         </header>
         <main id="main" className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">
+          {error && <p role="alert" className="mb-4 flex items-center justify-between gap-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">Not saved: {error}<button onClick={clearError} className="min-h-10 font-semibold underline">Dismiss</button></p>}
           {tabs && (
             <nav aria-label={`${current.label} sections`} className="no-print -mt-2 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
               {tabs.map((t) => {

@@ -7,10 +7,14 @@
 // data, no user, no date), so the markup always matches; afterwards they switch to browser data.
 import { useSyncExternalStore, type ReactNode } from "react";
 import { seed } from "./seed";
-import type { DB, Role, Startup } from "./types";
+import { nowStamp } from "./store-utils";
+import type { DB, Role, Startup, User } from "./types";
 
 const KEY = "sriif-demo-v3"; // bump when the data shape changes
 const SESSION = "sriif-session-v1";
+/** NEXT_PUBLIC_API=1: data comes from the Postgres-backed API instead of browser storage. */
+export const API = process.env.NEXT_PUBLIC_API === "1";
+const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 type State = {
   ready: boolean;
@@ -18,35 +22,38 @@ type State = {
   day: string;
   db: DB;
   userId: string | null;
+  /** Last save error from the server, shown in the portal. */
+  error: string;
 };
 
-const SERVER: State = { ready: false, day: "", db: seed, userId: null };
+const SERVER: State = { ready: false, day: "", db: seed, userId: null, error: "" };
 let state: State = SERVER;
 let loaded = false;
 const listeners = new Set<() => void>();
 
+/** Fill fields that older saved data may lack. */
+const withDefaults = (saved: Partial<DB>): DB => ({ ...seed, ...saved, cms: { ...seed.cms, ...saved.cms } });
+
 function load() {
   if (loaded || typeof window === "undefined") return;
   loaded = true;
+  if (API) { void refresh(); return; }
   let db = seed;
   let userId: string | null = null;
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const saved = JSON.parse(raw) as Partial<DB>;
-      db = { ...seed, ...saved, cms: { ...seed.cms, ...saved.cms } };
-    }
+    if (raw) db = withDefaults(JSON.parse(raw) as Partial<DB>);
     userId = localStorage.getItem(SESSION);
   } catch {
     /* corrupted storage: keep seed */
   }
-  state = { ready: true, day: today(), db, userId };
+  state = { ...state, ready: true, day: today(), db, userId };
 }
 
 function set(next: Partial<State>) {
   const prevDb = state.db;
   state = { ...state, ...next };
-  if (state.db !== prevDb) {
+  if (!API && state.db !== prevDb) {
     try {
       localStorage.setItem(KEY, JSON.stringify(state.db));
     } catch {
@@ -54,6 +61,45 @@ function set(next: Partial<State>) {
     }
   }
   listeners.forEach((l) => l());
+}
+
+// ── API mode: the server keeps the data; the browser holds the last state it received (base). ──
+let base: DB = seed;
+let dirty = false;
+let flushing = false;
+
+async function api<T>(path: string, body?: unknown): Promise<T> {
+  const r = await fetch(`${BASE_PATH}/api/${path}`, body === undefined ? { cache: "no-store" } : { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((j as { error?: string }).error ?? `Request failed (${r.status})`);
+  return j as T;
+}
+
+async function refresh() {
+  try {
+    const r = await api<{ userId: string | null; db: DB }>("state");
+    base = withDefaults(r.db);
+    set({ ready: true, day: today(), db: base, userId: r.userId, error: "" });
+  } catch (e) {
+    set({ ready: true, day: today(), error: (e as Error).message });
+  }
+}
+
+/** Send local edits; while a save is running, further edits are batched into the next one. */
+async function flush() {
+  if (flushing) return;
+  flushing = true;
+  while (dirty) {
+    dirty = false;
+    try {
+      const r = await api<{ userId: string | null; db: DB }>("state", { base, next: state.db });
+      base = withDefaults(r.db);
+      if (!dirty) set({ db: base, userId: r.userId, error: "" });
+    } catch (e) {
+      set({ db: base, error: (e as Error).message }); // roll back to the last saved state
+    }
+  }
+  flushing = false;
 }
 
 const subscribe = (l: () => void) => {
@@ -74,6 +120,29 @@ function update(fn: (d: DB) => void, auditAction?: string) {
     next.audit.unshift({ at: nowStamp(), by, action: auditAction });
   }
   set({ db: next });
+  if (API) { dirty = true; void flush(); }
+}
+
+/** Step 1 of login. Returns an error message, or "" when the OTP was sent. */
+async function sendOtp(email: string): Promise<string> {
+  if (API) {
+    try { await api("auth/otp", { email }); return ""; } catch (e) { return (e as Error).message; }
+  }
+  const u = state.db.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase());
+  if (!u || u.role === "mentor") return "This email is not registered. Only teams onboarded by SRIIF can log in.";
+  if (!u.active) return "This account is disabled. Contact SRIIF admin.";
+  return "";
+}
+
+/** Step 2 of login. Returns the user, or an error message. */
+async function verifyOtp(email: string, otp: string, demoOtp: string): Promise<User | string> {
+  if (API) {
+    try { await api("auth/verify", { email, otp }); } catch (e) { return (e as Error).message; }
+    await refresh();
+    return state.db.users.find((u) => u.id === state.userId) ?? "Login failed.";
+  }
+  if (otp !== demoOtp) return "Wrong OTP.";
+  return login(email) ?? "Login failed.";
 }
 
 function login(email: string) {
@@ -86,11 +155,13 @@ function login(email: string) {
 }
 
 function logout() {
+  if (API) { void api("auth/logout", {}).finally(refresh); set({ userId: null }); return; }
   localStorage.removeItem(SESSION);
   set({ userId: null });
 }
 
-const reset = () => set({ db: structuredClone(seed) });
+const reset = () => { if (!API) set({ db: structuredClone(seed) }); };
+const clearError = () => set({ error: "" });
 
 /** Kept so the layout tree stays unchanged; the store itself is module-level. */
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -100,7 +171,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 export function useStore() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const user = s.db.users.find((u) => u.id === s.userId && u.active && u.role !== "mentor") ?? null;
-  return { ready: s.ready, day: s.day, db: s.db, user, login, logout, update, reset };
+  return { ready: s.ready, day: s.day, db: s.db, user, error: s.error, login, logout, update, reset, sendOtp, verifyOtp, clearError };
 }
 
 /** The startup a page should show. Startup users are locked to their own startup. */
@@ -116,10 +187,7 @@ export function homeFor(role: Role) {
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 export const today = () => new Date().toISOString().slice(0, 10);
-export function nowStamp() {
-  const d = new Date();
-  return `${d.toISOString().slice(0, 10)} ${d.toTimeString().slice(0, 5)}`;
-}
+export { nowStamp };
 
 /** Days from now until the given ISO date (negative = past). */
 export function daysUntil(iso: string) {

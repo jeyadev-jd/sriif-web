@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   partialPrefetching: !pages,
   ...(pages && { output: "export", basePath, trailingSlash: true }),
   images: { unoptimized: pages },
+  // API routes are named route.api.ts so the static GitHub Pages export (no server) leaves them out.
+  pageExtensions: pages ? ["tsx", "ts"] : ["api.ts", "tsx", "ts"],
   env: { NEXT_PUBLIC_BASE_PATH: basePath },
   turbopack: {
     rules: {

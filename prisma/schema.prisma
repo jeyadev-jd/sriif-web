@@ -1,0 +1,273 @@
+// SRIIF portal database. Field names mirror src/lib/types.ts so rows map 1:1 to app objects.
+// Dates are ISO strings (YYYY-MM-DD or "YYYY-MM-DD HH:mm") as used across the app.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id          String   @id
+  name        String
+  email       String   @unique
+  phone       String   @default("")
+  role        String // admin | startup | mentor (mentors have no login)
+  designation String   @default("")
+  expertise   String?
+  active      Boolean  @default(true)
+  kyc         Json? // KycDoc[]
+  startupId   String?
+  startup     Startup? @relation(fields: [startupId], references: [id], onDelete: SetNull)
+
+  @@index([startupId])
+}
+
+model OtpCode {
+  email     String   @id
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+}
+
+model Startup {
+  id             String   @id
+  name           String
+  logo           String   @default("")
+  pitchDeck      Json?
+  gstin          String   @default("")
+  trl            Int      @default(1)
+  sectors        String[]
+  stage          String
+  program        String
+  cohort         String
+  onboardedOn    String
+  website        String   @default("")
+  linkedin       String   @default("")
+  regAddress     String   @default("")
+  commAddress    String   @default("")
+  email          String   @default("")
+  phone          String   @default("")
+  oneLiner       String   @default("")
+  status         String
+  mentorIds      String[]
+  seat           Json // { type, count, rate }
+  equityTaken    Boolean  @default(false)
+  founders       Json     @default("[]")
+  holdings       Json     @default("[]")
+  shareClasses   String   @default("")
+  capTableFile   String?
+  annual         Json     @default("[]")
+  meetings       Json     @default("[]")
+  memberRequests Json     @default("[]")
+  position       Int      @default(0)
+
+  users    User[]
+  docs     Document[]
+  funding  Funding[]
+  awards   Award[]
+  reports  Report[]
+  bookings Booking[]
+  invoices Invoice[]
+  tickets  Ticket[]
+  messages Message[]
+}
+
+model Document {
+  id         String  @id
+  startupId  String
+  startup    Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  type       String
+  name       String
+  version    Int
+  uploadedOn String
+  expiry     String?
+  financial  Boolean @default(false)
+  data       String? // file content (data URL) when uploaded
+  position   Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Funding {
+  id        String  @id
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  amount    Float
+  currency  String
+  type      String
+  source    String
+  date      String
+  round     String
+  proof     String?
+  position  Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Award {
+  id        String  @id
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  kind      String
+  title     String
+  org       String
+  year      String
+  category  String
+  link      String?
+  position  Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Report {
+  id           String  @id
+  startupId    String
+  startup      Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  period       String
+  milestones   String
+  users        Int
+  revenue      Float
+  pilots       Int
+  partnerships Int
+  challenges   String
+  support      String
+  submittedOn  String
+  submittedBy  String
+  position     Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Booking {
+  id        String   @id
+  startupId String
+  startup   Startup  @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  facility  String
+  date      String
+  slot      String
+  purpose   String
+  status    String
+  byAdmin   Boolean?
+  position  Int      @default(0)
+
+  @@index([startupId])
+  @@index([facility, date])
+}
+
+model Invoice {
+  id        String  @id
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  no        String
+  period    String
+  issued    String
+  due       String
+  lines     Json
+  status    String
+  kind      String?
+  title     String?
+  discount  Float?
+  notes     String?
+  payments  Json?
+  paidOn    String?
+  receiptNo String?
+  utr       String?
+  position  Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Ticket {
+  id        String  @id
+  no        String
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  raisedBy  String
+  category  String
+  subject   String
+  priority  String
+  status    String
+  created   String
+  messages  Json
+  position  Int     @default(0)
+
+  @@index([startupId])
+}
+
+model Message {
+  id        String  @id
+  startupId String
+  startup   Startup @relation(fields: [startupId], references: [id], onDelete: Cascade)
+  by        String
+  role      String
+  text      String
+  at        String
+  read      Boolean @default(false)
+  position  Int     @default(0)
+
+  @@index([startupId])
+}
+
+model JoinRequest {
+  id          String @id
+  name        String
+  email       String
+  phone       String
+  startupName String
+  idea        String
+  stage       String
+  via         String
+  receivedOn  String
+  status      String
+  note        String
+  position    Int    @default(0)
+}
+
+model Notice {
+  id       String @id
+  title    String
+  body     String
+  date     String
+  position Int    @default(0)
+}
+
+model AuditEntry {
+  id     Int    @id @default(autoincrement())
+  at     String
+  by     String
+  action String
+}
+
+model FacilityBlock {
+  id       String @id
+  facility String
+  date     String
+  slot     String
+  kind     String
+  reason   String
+  position Int    @default(0)
+}
+
+model Inquiry {
+  id       String @id
+  kind     String
+  type     String
+  name     String
+  email    String
+  phone    String
+  org      String
+  message  String
+  at       String
+  status   String
+  position Int    @default(0)
+}
+
+/** Singleton settings: facilities list and website content (pop-up, slides, events, gallery...). */
+model Setting {
+  key   String @id
+  value Json
+}

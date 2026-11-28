@@ -31,7 +31,19 @@ function AuthButton() {
 export function SiteHeader() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const [sub, setSub] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  // Lock page scroll behind the open mobile menu; close it with Escape or when the route changes.
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const k = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", k);
+    return () => { document.body.style.overflow = prev; window.removeEventListener("keydown", k); };
+  }, [open]);
+  const [lastPath, setLastPath] = useState(path);
+  if (path !== lastPath) { setLastPath(path); setOpen(false); }
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 8);
     on();
@@ -65,17 +77,26 @@ export function SiteHeader() {
         <button className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-slate-100 xl:hidden" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X size={22} aria-hidden /> : <Menu size={22} aria-hidden />}</button>
       </div>
       {open && (
-        <div className="border-t border-slate-200 bg-white px-4 pb-4 xl:hidden">
+        <nav aria-label="Mobile" className="max-h-[calc(100dvh-4.25rem)] overflow-y-auto overscroll-contain border-t border-slate-200 bg-white px-4 pb-6 xl:hidden">
           {nav.map((n) => (
-            <div key={n.label} className="py-1">
-              <Link href={n.href} onClick={() => setOpen(false)} className="block py-2 font-semibold text-slate-800">{n.label}</Link>
-              {n.children?.map((c) => (
-                <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="block py-1.5 pl-4 text-sm text-slate-600">{c.label}</Link>
-              ))}
+            <div key={n.label} className="border-b border-slate-100">
+              <div className="flex items-center">
+                <Link href={n.href} onClick={() => setOpen(false)} className="flex min-h-12 flex-1 items-center font-semibold text-slate-800">{n.label}</Link>
+                {n.children && (
+                  <button aria-label={`${sub === n.label ? "Hide" : "Show"} ${n.label} pages`} aria-expanded={sub === n.label} onClick={() => setSub(sub === n.label ? "" : n.label)} className="flex h-12 w-12 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100">
+                    <ChevronDown size={18} className={cx("transition-transform", sub === n.label && "rotate-180")} aria-hidden />
+                  </button>
+                )}
+              </div>
+              {n.children && sub === n.label && (
+                <div className="pb-2">
+                  {n.children.map((c) => <Link key={c.href} href={c.href} onClick={() => setOpen(false)} className="flex min-h-11 items-center pl-4 text-sm text-slate-600">{c.label}</Link>)}
+                </div>
+              )}
             </div>
           ))}
-          <div className="mt-3 flex gap-2"><AuthButton /><LinkButton href="/apply" variant="accent" size="sm">Apply for Incubation</LinkButton></div>
-        </div>
+          <div className="mt-4 flex flex-wrap gap-2"><AuthButton /><LinkButton href="/apply" variant="accent" size="sm">Apply for Incubation</LinkButton></div>
+        </nav>
       )}
     </header>
   );

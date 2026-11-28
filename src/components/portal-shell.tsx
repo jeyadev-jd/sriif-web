@@ -2,7 +2,7 @@
 
 import {
   Award, Building2, CalendarDays, ChartColumn, ClipboardCheck, Coins, DoorOpen, FileText, FolderLock, History, House, Inbox, LifeBuoy,
-  Globe, LogOut, Mail, Megaphone, Menu, MessagesSquare, ShieldCheck, PieChart, Receipt, UserPlus, Users, UsersRound, X, type LucideIcon,
+  Globe, LogOut, Mail, Megaphone, Menu, MessagesSquare, PanelLeftClose, PanelLeftOpen, ShieldCheck, PieChart, Receipt, UserPlus, Users, UsersRound, X, type LucideIcon,
 } from "lucide-react";
 import Image from "next/image";
 import { asset } from "@/lib/site";
@@ -54,6 +54,17 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
   const router = useRouter();
   const path = usePathname();
   const [open, setOpen] = useState(false);
+  const [hidden, setHidden] = useState(false); // desktop: sidebar hidden by the user
+  useEffect(() => {
+    try { if (localStorage.getItem("sriif-sidebar") === "hidden") setHidden(true); } catch { /* storage blocked */ } // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
+  const toggleHidden = () => setHidden((h) => { try { localStorage.setItem("sriif-sidebar", h ? "shown" : "hidden"); } catch { /* ignore */ } return !h; });
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [open]);
 
   const allowed = ready && user && user.role === role;
   useEffect(() => {
@@ -84,7 +95,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
 
   return (
     <div className="flex min-h-screen flex-1 bg-slate-50">
-      <aside className={cx("no-print fixed inset-y-0 left-0 z-40 flex w-68 flex-col bg-brand-dark transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
+      <aside className={cx("no-print fixed inset-y-0 left-0 z-40 flex w-68 flex-col bg-brand-dark transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full", hidden && "lg:hidden")}>
         <div className="flex items-center justify-between border-b border-white/10 p-4">
           <Link href="/" className="flex items-center gap-3">
             <Image src={asset("/img/logo-sm.png")} alt="SRIIF home" width={38} height={38} className="rounded-full bg-white" />
@@ -124,6 +135,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="no-print sticky top-0 z-20 flex min-h-16 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:px-8">
           <button className="flex h-11 w-11 items-center justify-center rounded-lg hover:bg-slate-100 lg:hidden" aria-label="Open menu" onClick={() => setOpen(true)}><Menu size={22} aria-hidden /></button>
+          <button className="hidden h-11 w-11 items-center justify-center rounded-lg hover:bg-slate-100 lg:flex" aria-label={hidden ? "Show sidebar" : "Hide sidebar"} title={hidden ? "Show sidebar" : "Hide sidebar"} aria-pressed={!hidden} onClick={toggleHidden}>{hidden ? <PanelLeftOpen size={22} aria-hidden /> : <PanelLeftClose size={22} aria-hidden />}</button>
           <p className="min-w-0 flex-1 truncate text-sm text-slate-500">
             {startup ? <><b className="text-slate-900">{startup.name}</b><span className="hidden sm:inline"> · {startup.program} · {startup.cohort}</span></> : ROLE_LABEL[role]}
           </p>

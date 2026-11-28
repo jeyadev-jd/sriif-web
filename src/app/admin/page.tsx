@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, Download, Pause, Play, Printer, RotateCcw, UserPlus } from "lucide-react";
+import { ChartPie, ChevronLeft, ChevronRight, Download, Pause, Play, Printer, RotateCcw, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { AreaChart, BarList, Ring } from "@/components/charts";
@@ -133,7 +133,7 @@ export default function AdminHome() {
   return (
     <>
       <PageTitle title="Dashboard" sub="Ecosystem analytics. Filter, then export what you see."
-        action={<Link href="/admin/onboard" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark"><UserPlus size={18} aria-hidden />Onboard a startup</Link>} />
+        action={<span className="flex flex-wrap gap-2"><Link href="/admin/insights" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-brand-dark hover:brightness-95"><ChartPie size={18} aria-hidden />See all insights</Link><Link href="/admin/onboard" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-dark"><UserPlus size={18} aria-hidden />Onboard a startup</Link></span>} />
       <Highlights items={highlights} />
 
       <Card className="no-print mt-6" title="Filters" action={filtered && <Button size="sm" variant="ghost" onClick={() => setF(NONE)}><RotateCcw size={16} aria-hidden />Clear</Button>}>

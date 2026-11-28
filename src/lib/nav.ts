@@ -22,7 +22,7 @@ export const startupNav: NavItem[] = [
 /** Six top-level areas; each shows its pages as tabs at the top. */
 export const adminNav: NavItem[] = [
   { label: "Dashboard", href: "/admin", icon: "home", tabs: [
-    { label: "Analytics", href: "/admin" }, { label: "Impact reports", href: "/admin/reports" }, { label: "Audit log", href: "/admin/audit" },
+    { label: "Analytics", href: "/admin" }, { label: "All insights", href: "/admin/insights" }, { label: "Impact reports", href: "/admin/reports" }, { label: "Audit log", href: "/admin/audit" },
   ] },
   { label: "Startups", href: "/admin/startups", icon: "building", tabs: [
     { label: "All startups", href: "/admin/startups" }, { label: "Onboarding requests", href: "/admin/requests" }, { label: "Onboard", href: "/admin/onboard" },

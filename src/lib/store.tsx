@@ -9,7 +9,7 @@ import { useSyncExternalStore, type ReactNode } from "react";
 import { seed } from "./seed";
 import type { DB, Role, Startup } from "./types";
 
-const KEY = "sriif-demo-v2"; // bump when the data shape changes
+const KEY = "sriif-demo-v3"; // bump when the data shape changes
 const SESSION = "sriif-session-v1";
 
 type State = {
@@ -77,7 +77,7 @@ function update(fn: (d: DB) => void, auditAction?: string) {
 }
 
 function login(email: string) {
-  const u = state.db.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.active) ?? null;
+  const u = state.db.users.find((x) => x.email.toLowerCase() === email.trim().toLowerCase() && x.active && x.role !== "mentor") ?? null;
   if (u) {
     localStorage.setItem(SESSION, u.id);
     set({ userId: u.id });
@@ -99,7 +99,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
 export function useStore() {
   const s = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const user = s.db.users.find((u) => u.id === s.userId && u.active) ?? null;
+  const user = s.db.users.find((u) => u.id === s.userId && u.active && u.role !== "mentor") ?? null;
   return { ready: s.ready, day: s.day, db: s.db, user, login, logout, update, reset };
 }
 
@@ -111,7 +111,7 @@ export function useStartup(id?: string): Startup | null {
 }
 
 export function homeFor(role: Role) {
-  return role === "admin" ? "/admin" : role === "mentor" ? "/mentor" : "/portal";
+  return role === "admin" ? "/admin" : "/portal";
 }
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
@@ -144,12 +144,13 @@ export function fmtDate(iso?: string, withYear = true) {
 }
 
 /** Intra-state supply (Tamil Nadu): GST split equally into CGST and SGST. */
-export function invoiceTotals(lines: { amount: number }[], gstRate = 0.18) {
-  const sub = lines.reduce((a, l) => a + l.amount, 0);
+export function invoiceTotals(lines: { amount: number }[], gstRate = 0.18, discount = 0) {
+  const gross = lines.reduce((a, l) => a + l.amount, 0);
+  const sub = Math.max(0, gross - (discount || 0));
   const cgst = Math.round((sub * gstRate) / 2);
   const sgst = cgst;
   const gst = cgst + sgst;
-  return { sub, cgst, sgst, gst, total: sub + gst };
+  return { gross, discount: gross - sub, sub, cgst, sgst, gst, total: sub + gst };
 }
 
 /** Events on or after today, soonest first. */

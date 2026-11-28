@@ -25,7 +25,7 @@ function Onboard({ reqId }: { reqId: string | null }) {
   const req = db.requests.find((r) => r.id === reqId);
 
   const [s, setS] = useState({
-    name: req?.startupName ?? "", oneLiner: req?.idea ?? "", program: "Resident Incubation" as Startup["program"], cohort: "Cohort 2027-A",
+    name: req?.startupName ?? "", oneLiner: req?.idea ?? "", program: "Incubation" as Startup["program"], cohort: "Cohort 2027-A",
     stage: "Idea" as Startup["stage"], sectors: [] as string[], email: req?.email ?? "", phone: req?.phone ?? "",
     seatType: "Dedicated desk", seatCount: 1, seatRate: 3000, equityTaken: false, mentorIds: [] as string[],
   });
@@ -66,7 +66,7 @@ function Onboard({ reqId }: { reqId: string | null }) {
           <div className="grid gap-4 md:grid-cols-2">
             <Field label="Startup name"><input className="field" value={s.name} onChange={(e) => setS({ ...s, name: e.target.value })} /></Field>
             <Field label="One-liner"><input className="field" value={s.oneLiner} onChange={(e) => setS({ ...s, oneLiner: e.target.value })} /></Field>
-            <Field label="Program"><select className="field" value={s.program} onChange={(e) => setS({ ...s, program: e.target.value as Startup["program"] })}>{["Pre-Incubation", "Resident Incubation", "Virtual Incubation"].map((x) => <option key={x}>{x}</option>)}</select></Field>
+            <Field label="Program"><select className="field" value={s.program} onChange={(e) => setS({ ...s, program: e.target.value as Startup["program"] })}>{["Pre-Incubation", "Incubation"].map((x) => <option key={x}>{x}</option>)}</select></Field>
             <Field label="Cohort"><input className="field" value={s.cohort} onChange={(e) => setS({ ...s, cohort: e.target.value })} /></Field>
             <Field label="Stage"><select className="field" value={s.stage} onChange={(e) => setS({ ...s, stage: e.target.value as Startup["stage"] })}>{["Idea", "MVP", "Revenue", "Scaling"].map((x) => <option key={x}>{x}</option>)}</select></Field>
             <Field label="Startup email"><input className="field" type="email" value={s.email} onChange={(e) => setS({ ...s, email: e.target.value })} /></Field>
@@ -78,7 +78,7 @@ function Onboard({ reqId }: { reqId: string | null }) {
         </Card>
         <Card title="2. Seat & terms">
           <div className="grid gap-4 md:grid-cols-4">
-            <Field label="Seat type"><select className="field" value={s.seatType} onChange={(e) => setS({ ...s, seatType: e.target.value })}>{["Hot desk", "Dedicated desk", "Cabin", "Virtual membership"].map((x) => <option key={x}>{x}</option>)}</select></Field>
+            <Field label="Seat type"><select className="field" value={s.seatType} onChange={(e) => setS({ ...s, seatType: e.target.value })}>{["Hot desk", "Dedicated desk", "Cabin"].map((x) => <option key={x}>{x}</option>)}</select></Field>
             <Field label="Seats"><input className="field" type="number" min={1} value={s.seatCount} onChange={(e) => setS({ ...s, seatCount: Number(e.target.value) })} /></Field>
             <Field label="Rate per seat / month (₹)"><input className="field" type="number" min={0} value={s.seatRate} onChange={(e) => setS({ ...s, seatRate: Number(e.target.value) })} /></Field>
             <label className="flex items-center gap-2 pt-6 text-sm"><input type="checkbox" checked={s.equityTaken} onChange={(e) => setS({ ...s, equityTaken: e.target.checked })} /> SRIIF takes equity</label>

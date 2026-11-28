@@ -15,7 +15,7 @@ const items = [
 export default function Services() {
   return (
     <>
-      <PageHero eyebrow="Services" title="Support for every stage" sub="What SRIIF startups get beyond a desk." img="/img/cowork1.jpg" />
+      <PageHero eyebrow="Services" title="Support for every stage" sub="What SRIIF startups get beyond a desk." img="/img/cowork1.webp" />
       <Container>
         <div className="grid gap-5 md:grid-cols-2">
           {items.map((i) => (

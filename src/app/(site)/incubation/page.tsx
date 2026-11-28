@@ -9,12 +9,12 @@ export const metadata = { title: "Programs" };
 export default function Incubation() {
   return (
     <>
-      <PageHero eyebrow="Programs & cohorts" title="Three ways to incubate with SRIIF" sub="Pre-Incubation (3 months), Resident Incubation (6 months) and Virtual Incubation (6 months). Each has clear eligibility, deliverables and a review at the end." img="/img/incubation.jpg">
+      <PageHero eyebrow="Programs & cohorts" title="Two ways to incubate with SRIIF" sub="Pre-Incubation (3 months) and Incubation (6 months). Each has clear eligibility, deliverables and a review at the end." img="/img/incubation.webp">
         <LinkButton href="/apply" variant="accent">Apply for Incubation</LinkButton>
       </PageHero>
       <Container>
         <SectionHead label="Programs" title="Choose your track" />
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {programs.map((p) => (
             <div key={p.slug} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
               <div className="relative h-44"><Image src={p.img} alt={p.title} fill className="object-cover" sizes="33vw" /></div>

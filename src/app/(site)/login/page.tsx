@@ -11,7 +11,6 @@ const demo = [
   ["SRIIF Admin", "admin@sriif.in"],
   ["Startup founder (CareLoop)", "priya@careloop.example.in"],
   ["Startup member (CareLoop)", "arjun@careloop.example.in"],
-  ["Mentor", "mentor@sriif.in"],
 ];
 
 export default function Login() {
@@ -39,7 +38,7 @@ export default function Login() {
     <div className="mx-auto grid max-w-5xl gap-8 px-4 py-16 md:grid-cols-2">
       <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         <h1 className="text-2xl font-bold text-brand-dark">Portal login</h1>
-        <p className="mt-1 text-sm text-slate-500">For onboarded startups, mentors and SRIIF staff.</p>
+        <p className="mt-1 text-sm text-slate-500">For onboarded startups and SRIIF staff.</p>
         <form className="mt-6 grid gap-4" onSubmit={(e) => { e.preventDefault(); if (step === "email") sendOtp(); else verify(); }}>
           <Field label="Registered email"><input className="field" type="email" value={email} onChange={(e) => { setEmail(e.target.value); setStep("email"); }} required autoComplete="email" /></Field>
           {step === "otp" && (

@@ -17,7 +17,7 @@ export function Brochure() {
       <div className="no-print mb-4 flex justify-end"><Button onClick={() => window.print()}>Save as PDF</Button></div>
       <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
         <header className="bg-brand-dark p-10 text-white">
-          <div className="flex items-center gap-3"><Image src={asset("/img/logo.png")} alt="" width={44} height={44} className="rounded-full bg-white" /><span className="text-sm">{brand.fullName}</span></div>
+          <div className="flex items-center gap-3"><Image src={asset("/img/logo-sm.png")} alt="" width={44} height={44} className="rounded-full bg-white" /><span className="text-sm">{brand.fullName}</span></div>
           <p className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-accent">{e.category}</p>
           <h1 className="display mt-2 text-6xl">{e.title}</h1>
           <p className="mt-4 text-lg text-white/85">{e.summary}</p>

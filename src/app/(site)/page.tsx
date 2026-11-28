@@ -1,5 +1,5 @@
 import { WhatsOnPopup } from "@/components/whats-on";
-import { AboutBlock, CtaBlock, EventsBlock, FacilitiesBlock, FaqBlock, GatewayBlock, Hero, ImpactBlock, JoinBlock, JourneyBlock, PartnersBlock, ProgramsBlock, StartupsBlock, TestimonialsBlock, TrustStrip, WhyBlock } from "@/components/sections";
+import { AboutBlock, CtaBlock, EventsBlock, FacilitiesBlock, FaqBlock, GatewayBlock, Hero, ImpactBlock, JoinBlock, JourneyBlock, PartnersBlock, ProgramsBlock, StartupsBlock, TeamBlock, TestimonialsBlock, TrustStrip, WhyBlock } from "@/components/sections";
 
 export default function Home() {
   return (
@@ -17,6 +17,7 @@ export default function Home() {
       <EventsBlock />
       <PartnersBlock />
       <StartupsBlock limit={6} />
+      <TeamBlock />
       <TestimonialsBlock />
       <JoinBlock />
       <FaqBlock preview />

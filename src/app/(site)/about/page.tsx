@@ -8,7 +8,7 @@ export const metadata = { title: "About" };
 export default function About() {
   return (
     <>
-      <PageHero eyebrow="About SRIIF" title="A university incubator for healthcare and deep-tech founders" sub={about.intro} img="/img/sriif2.png">
+      <PageHero eyebrow="About SRIIF" title="A university incubator for healthcare and deep-tech founders" sub={about.intro} img="/img/sriif2.webp">
         <LinkButton href={links.aboutSriic} external variant="accent">About SRIIC on sriramachandra.edu</LinkButton>
       </PageHero>
       <AboutBlock />

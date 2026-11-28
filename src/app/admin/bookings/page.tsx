@@ -9,7 +9,7 @@ import { fmtDate, inr, today, uid, useStore } from "@/lib/store";
 import type { Booking, FacilityBlock, Startup } from "@/lib/types";
 
 const TABS = ["Schedule", "Requests", "Seating"] as const;
-const SEATS = ["Hot desk", "Dedicated desk", "Cabin", "Virtual membership"];
+const SEATS = ["Hot desk", "Dedicated desk", "Cabin"];
 // UTC date maths so the week grid does not shift with the browser timezone.
 const addDays = (iso: string, n: number) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const monday = (iso: string) => addDays(iso, -((new Date(iso + "T00:00:00Z").getUTCDay() + 6) % 7));
@@ -170,7 +170,7 @@ function CellModal({ facility, date, onClose }: { facility: string; date: string
 function Seating() {
   const { db, update } = useStore();
   const [draft, setDraft] = useState(() => Object.fromEntries(db.startups.map((s) => [s.id, { ...s.seat }])));
-  const used = db.startups.filter((s) => s.status === "Active" && s.program !== "Virtual Incubation").reduce((a, s) => a + s.seat.count, 0);
+  const used = db.startups.filter((s) => s.status === "Active").reduce((a, s) => a + s.seat.count, 0);
   return (
     <Card title={`Seat allocation · ${used} of 30 co-working seats in use`}>
       <Table head={["Startup", "Tier", "Seat type", "Seats", "Rate / seat", "Monthly", ""]} rows={db.startups.map((s) => {

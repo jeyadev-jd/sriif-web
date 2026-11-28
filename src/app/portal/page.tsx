@@ -16,7 +16,7 @@ export default function Dashboard() {
   const missing = DOC_TYPES.filter((t) => t.mandatory && !s.docs.some((d) => d.type === t.type));
   const expiring = s.docs.filter((d) => d.expiry && daysUntil(d.expiry) < 45);
   const due = s.invoices.filter((i) => i.status === "Due" && !i.utr);
-  const dueAmt = due.reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
+  const dueAmt = due.reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate, i.discount).total, 0);
   const lastReport = s.reports.at(-1);
   const unread = db.messages.filter((m) => m.startupId === s.id && m.role === "admin" && !m.read).length;
   const pendingKyc = db.users.filter((u) => u.startupId === s.id && kycStatus(u.kyc) !== "Verified");
@@ -31,7 +31,7 @@ export default function Dashboard() {
     ...missing.map((m) => ({ icon: Upload, text: `Upload ${m.type}`, href: "/portal/documents", tone: "text-red-600" })),
     ...expiring.map((d) => ({ icon: FileWarning, text: `Renew ${d.type} – expires ${fmtDate(d.expiry)}`, href: "/portal/documents", tone: "text-amber-600" })),
     ...pendingKyc.filter((u) => kycStatus(u.kyc) === "Missing" || kycStatus(u.kyc) === "Rejected").map((u) => ({ icon: ShieldAlert, text: `Upload KYC documents for ${u.name}`, href: "/portal/team", tone: "text-red-600" })),
-    ...due.map((i) => ({ icon: Receipt, text: `Pay invoice ${i.no} (${inr(invoiceTotals(i.lines, brand.gstRate).total)})`, href: "/portal/invoices", tone: "text-amber-600" })),
+    ...due.map((i) => ({ icon: Receipt, text: `Pay invoice ${i.no} (${inr(invoiceTotals(i.lines, brand.gstRate, i.discount).total)})`, href: "/portal/invoices", tone: "text-amber-600" })),
   ];
 
   return (

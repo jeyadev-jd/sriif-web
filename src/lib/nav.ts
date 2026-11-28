@@ -1,6 +1,7 @@
 // Sidebar menus for each portal role.
 /** icon = lucide icon key mapped in portal-shell (strings so layouts can stay server components). */
-export type NavItem = { label: string; href: string; group?: string; icon: string };
+export type Tab = { label: string; href: string };
+export type NavItem = { label: string; href: string; group?: string; icon: string; tabs?: Tab[] };
 
 export const startupNav: NavItem[] = [
   { label: "Dashboard", href: "/portal", icon: "home" },
@@ -18,26 +19,19 @@ export const startupNav: NavItem[] = [
   { label: "Letters & reports (PDF)", href: "/portal/letters", group: "Records", icon: "file" },
 ];
 
+/** Six top-level areas; each shows its pages as tabs at the top. */
 export const adminNav: NavItem[] = [
-  { label: "Dashboard", href: "/admin", icon: "home" },
-  { label: "Onboarding requests", href: "/admin/requests", group: "Onboarding", icon: "inbox" },
-  { label: "Onboard a startup", href: "/admin/onboard", group: "Onboarding", icon: "userplus" },
-  { label: "Team e-verification", href: "/admin/verification", group: "Onboarding", icon: "shield" },
-  { label: "All startups", href: "/admin/startups", group: "Startups", icon: "building" },
-  { label: "Progress reviews", href: "/admin/reviews", group: "Startups", icon: "clipboard" },
-  { label: "Helpdesk tickets", href: "/admin/tickets", group: "Startups", icon: "help" },
-  { label: "Messages", href: "/admin/messages", group: "Startups", icon: "message" },
-  { label: "Facility control", href: "/admin/bookings", group: "Operations", icon: "calendar" },
-  { label: "Invoices & billing", href: "/admin/billing", group: "Operations", icon: "receipt" },
-  { label: "Mentors", href: "/admin/mentors", group: "Operations", icon: "mentor" },
-  { label: "Announcements", href: "/admin/notices", group: "Operations", icon: "megaphone" },
-  { label: "Website content", href: "/admin/cms", group: "Website", icon: "globe" },
-  { label: "Website inbox", href: "/admin/inbox", group: "Website", icon: "mail" },
-  { label: "Impact reports", href: "/admin/reports", group: "Reports", icon: "chart" },
-  { label: "Audit log", href: "/admin/audit", group: "Reports", icon: "history" },
-];
-
-export const mentorNav: NavItem[] = [
-  { label: "My startups", href: "/mentor", icon: "building" },
-  { label: "Meetings", href: "/mentor/meetings", icon: "calendar" },
+  { label: "Dashboard", href: "/admin", icon: "home", tabs: [
+    { label: "Analytics", href: "/admin" }, { label: "Impact reports", href: "/admin/reports" }, { label: "Audit log", href: "/admin/audit" },
+  ] },
+  { label: "Startups", href: "/admin/startups", icon: "building", tabs: [
+    { label: "All startups", href: "/admin/startups" }, { label: "Onboarding requests", href: "/admin/requests" }, { label: "Onboard", href: "/admin/onboard" },
+    { label: "E-verification", href: "/admin/verification" }, { label: "Progress reviews", href: "/admin/reviews" }, { label: "Mentors", href: "/admin/mentors" },
+  ] },
+  { label: "Facilities", href: "/admin/bookings", icon: "calendar" },
+  { label: "Billing", href: "/admin/billing", icon: "receipt" },
+  { label: "Helpdesk", href: "/admin/tickets", icon: "help", tabs: [
+    { label: "Tickets", href: "/admin/tickets" }, { label: "Messages", href: "/admin/messages" }, { label: "Website inbox", href: "/admin/inbox" }, { label: "Announcements", href: "/admin/notices" },
+  ] },
+  { label: "Website", href: "/admin/cms", icon: "globe" },
 ];

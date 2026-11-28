@@ -1,61 +1,65 @@
 "use client";
 
-import { ArrowRight, BadgeCheck, Building2, CheckCircle2, FlaskConical, GraduationCap, HandCoins, Handshake, Lightbulb, Rocket, Scale, Store, UserRoundCheck, Users, XCircle } from "lucide-react";
+import { ArrowRight, BadgeCheck, ChevronLeft, ChevronRight, ExternalLink, Pause, Play, Building2, CheckCircle2, FlaskConical, GraduationCap, HandCoins, Handshake, Lightbulb, Rocket, Scale, Store, UserRoundCheck, Users, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { about, asset, brand, facilities, heroWords, journey, mentors, programs, publicStartups, team, why } from "@/lib/site";
+import { about, asset, brand, facilities, journey, mentors, programs, team, why } from "@/lib/site";
+import { useStore } from "@/lib/store";
+import type { Showcase } from "@/lib/types";
 
 export { EventsBlock, FaqBlock, ImpactBlock, JoinBlock, PartnersBlock, TestimonialsBlock } from "./cms-blocks";
 import { Container, SectionHead } from "./site-chrome";
 import { cx, LinkButton } from "./ui";
 
-function Typewriter() {
-  const [i, setI] = useState(0);
-  const [n, setN] = useState(0);
-  const word = heroWords[i % heroWords.length];
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (n < word.length) setN(n + 1);
-      else { setN(0); setI(i + 1); }
-    }, n < word.length ? 80 : 1600);
-    return () => clearTimeout(t);
-  }, [n, i, word.length]);
-  return <span aria-live="off">{word.slice(0, n)}<span className="animate-pulse text-accent" aria-hidden>|</span></span>;
-}
-
-
+/** Auto-rotating hero banner. Slides are managed in Admin → Website → Hero slider. */
 export function Hero() {
+  const { db } = useStore();
+  const slides = db.cms.slides.filter((x) => x.show);
+  const [i, setI] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const n = slides.length;
+  const cur = n ? i % n : 0;
+  useEffect(() => {
+    if (paused || n < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setTimeout(() => setI((v) => v + 1), 6000);
+    return () => clearTimeout(t);
+  }, [i, paused, n]);
+  if (!n) return null;
+  const go = (d: number) => setI((v) => (v + d + n) % n);
   return (
-    <section className="grid-paper relative overflow-hidden border-b border-slate-200">
-      <div className="mx-auto max-w-7xl px-4 pb-16 pt-14 text-center md:pt-20">
-        <p className="mx-auto inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-brand shadow-sm">
-          <span className="h-2 w-2 rounded-full bg-accent" aria-hidden />Next cohort · Jan 2027 · applications open
-        </p>
-        <h1 className="display mx-auto mt-6 max-w-5xl text-5xl text-brand-dark sm:text-7xl lg:text-8xl">
-          <span className="sr-only">{brand.tagline} scalable businesses, deep-tech ventures, social impact and global brands</span><span aria-hidden>{brand.tagline}<br /><span className="mark inline-block min-h-[1em]"><Typewriter /></span></span>
-        </h1>
-        <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-600">{brand.subTagline} At SRIHER, Chennai, beside a 1200-bed hospital.</p>
-        <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <LinkButton href="/apply" variant="accent" className="min-h-12 px-6 text-base uppercase tracking-wide">Apply for incubation</LinkButton>
-          <LinkButton href="/login" variant="outline" className="min-h-12 bg-white px-6 text-base">Portal login</LinkButton>
-        </div>
-      </div>
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="relative overflow-hidden rounded-t-2xl border border-b-0 border-slate-200 bg-white shadow-[0_-20px_60px_-30px_rgb(11_60_111/0.35)]">
-          <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-50 px-4 py-2.5" aria-hidden>
-            <span className="h-2.5 w-2.5 rounded-full bg-red-400" /><span className="h-2.5 w-2.5 rounded-full bg-amber-400" /><span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            <span className="ml-3 text-xs text-slate-400">SRIIF · Sri Ramachandra campus, Porur</span>
-          </div>
-          <div className="relative aspect-[3/4] bg-brand-dark sm:aspect-[16/9] md:aspect-[16/7]">
-            <video className="absolute inset-0 h-full w-full object-cover" src={asset("/img/home.mp4")} poster={asset("/img/herohome.jpg")} autoPlay muted loop playsInline aria-label="Life at the SRIIF incubation centre" />
-            <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center justify-between gap-3 bg-gradient-to-t from-brand-dark/90 to-transparent px-5 pb-4 pt-12 text-left text-white">
-              <p className="text-sm font-semibold">Labs, hospital access and co-working on one campus</p>
-              <Link href="/facilities" className="inline-flex min-h-10 items-center gap-1 rounded-full bg-white/15 px-4 text-sm font-semibold backdrop-blur hover:bg-white/25">Tour facilities<ArrowRight size={16} aria-hidden /></Link>
+    <section aria-roledescription="carousel" aria-label="Highlights" className="relative isolate overflow-hidden bg-brand-dark text-white"
+      onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onFocus={() => setPaused(true)} onBlur={() => setPaused(false)}>
+      <div className="relative min-h-[34rem] md:min-h-[38rem]">
+        {slides.map((s, k) => (
+          <div key={s.id} role="group" aria-roledescription="slide" aria-label={`${k + 1} of ${n}`} inert={k !== cur}
+            className={cx("absolute inset-0 transition-opacity duration-700", k === cur ? "opacity-100" : "pointer-events-none opacity-0")}>
+            {s.img && <Image src={s.img} alt="" fill priority={k === 0} loading={k === 0 ? undefined : "lazy"} sizes="100vw" className="-z-10 object-cover" />}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-dark/95 via-brand-dark/75 to-brand-dark/20" aria-hidden />
+            <div className="mx-auto flex h-full max-w-7xl flex-col justify-center px-4 py-20">
+              <p className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.15em] text-accent backdrop-blur">
+                <span className="h-2 w-2 rounded-full bg-accent" aria-hidden />SRIIF · SRIHER, Chennai
+              </p>
+              {k === 0 ? <h1 className="display mt-5 max-w-3xl text-5xl sm:text-6xl lg:text-7xl">{s.title}</h1> : <h2 className="display mt-5 max-w-3xl text-5xl sm:text-6xl lg:text-7xl">{s.title}</h2>}
+              <p className="mt-5 max-w-xl text-lg text-white/85">{s.sub}</p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {s.ctaHref && <LinkButton href={s.ctaHref} variant="accent" className="min-h-12 px-6 text-base uppercase tracking-wide">{s.ctaLabel}</LinkButton>}
+                <LinkButton href="/login" variant="outline" className="min-h-12 border-white/40 bg-transparent px-6 text-base text-white hover:bg-white/10">Portal login</LinkButton>
+              </div>
             </div>
           </div>
-        </div>
+        ))}
       </div>
+      {n > 1 && (
+        <div className="absolute inset-x-0 bottom-5 mx-auto flex max-w-7xl items-center gap-3 px-4">
+          <button onClick={() => go(-1)} aria-label="Previous slide" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"><ChevronLeft size={20} aria-hidden /></button>
+          <div className="flex gap-2">
+            {slides.map((s, k) => <button key={s.id} onClick={() => setI(k)} aria-label={`Go to slide ${k + 1}`} aria-current={k === cur} className="flex h-11 items-center"><span className={cx("block h-1.5 rounded-full transition-all", k === cur ? "w-10 bg-accent" : "w-5 bg-white/40")} /></button>)}
+          </div>
+          <button onClick={() => go(1)} aria-label="Next slide" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"><ChevronRight size={20} aria-hidden /></button>
+          <button onClick={() => setPaused((v) => !v)} aria-label={paused ? "Play slides" : "Pause slides"} className="ml-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/20">{paused ? <Play size={18} aria-hidden /> : <Pause size={18} aria-hidden />}</button>
+        </div>
+      )}
     </section>
   );
 }
@@ -65,7 +69,7 @@ export function AboutBlock() {
     <Container>
       <div className="grid items-center gap-12 lg:grid-cols-2">
         <div className="relative">
-          <Image src={asset("/img/sriif1.png")} alt="SRIIF incubation centre" width={720} height={520} className="rounded-2xl object-cover shadow-lg" />
+          <Image src={asset("/img/sriif1.webp")} alt="SRIIF incubation centre" width={720} height={520} className="rounded-2xl object-cover shadow-lg" />
           <span className="absolute -bottom-4 left-6 rounded-full bg-accent px-4 py-2 text-sm font-bold text-brand-dark shadow">{brand.since}</span>
         </div>
         <div>
@@ -245,39 +249,60 @@ export function MentorsBlock() {
   );
 }
 
+function Logo({ s, size = 48 }: { s: Showcase; size?: number }) {
+  return s.logo
+    ? <Image src={s.logo} alt="" width={size} height={size} unoptimized className="shrink-0 rounded-lg bg-white object-contain" style={{ width: size, height: size }} />
+    : <span className="display flex shrink-0 items-center justify-center rounded-lg bg-mist text-xl text-brand-dark" style={{ width: size, height: size }} aria-hidden>{s.name[0]}</span>;
+}
+
+/** Startups chosen by admin (Website → Startup showcase). Each card opens the startup's own website. */
 export function StartupsBlock({ limit }: { limit?: number }) {
-  const sectors = ["All", ...Array.from(new Set(publicStartups.map((s) => s.sector)))];
+  const { db } = useStore();
+  const shown = db.cms.showcase.filter((s) => s.show);
+  const sectors = ["All", ...Array.from(new Set(shown.map((s) => s.sector)))];
   const [f, setF] = useState("All");
   const [q, setQ] = useState("");
-  const list = publicStartups.filter((s) => (f === "All" || s.sector === f) && s.name.toLowerCase().includes(q.toLowerCase())).slice(0, limit);
+  const list = shown.filter((s) => (f === "All" || s.sector === f) && s.name.toLowerCase().includes(q.toLowerCase()));
+  const Card = ({ s }: { s: Showcase }) => (
+    <a href={s.website || undefined} target="_blank" rel="noopener noreferrer" className="group flex h-full gap-4 rounded-xl border border-slate-200 bg-white p-4 transition-colors hover:border-brand">
+      <Logo s={s} />
+      <span className="min-w-0">
+        <span className="flex items-center gap-1 font-semibold text-brand-dark group-hover:text-brand">{s.name}{s.website && <ExternalLink size={14} aria-hidden />}</span>
+        <span className="block text-sm text-slate-600">{s.desc}</span>
+        <span className="mt-1 block text-xs text-slate-500">{s.sector} · {s.stage} · {s.year}</span>
+        {s.website && <span className="sr-only">(opens website in new tab)</span>}
+      </span>
+    </a>
+  );
+  if (limit) {
+    // Home page: continuous auto-scrolling strip (pauses on hover; static when reduced motion is on).
+    const loop = [...shown, ...shown];
+    return (
+      <Container>
+        <SectionHead label="Our startups" title="Startups incubated at SRIIF" sub="Click a startup to visit its website." />
+        <div className="marquee group relative overflow-hidden [mask-image:linear-gradient(90deg,transparent,black_6%,black_94%,transparent)]">
+          <ul className="marquee-track flex w-max gap-4 group-hover:[animation-play-state:paused] group-focus-within:[animation-play-state:paused]" style={{ animationDuration: `${Math.max(20, shown.length * 6)}s` }}>
+            {loop.map((s, k) => <li key={s.id + k} className="w-80 shrink-0" aria-hidden={k >= shown.length}><Card s={s} /></li>)}
+          </ul>
+        </div>
+        <div className="mt-6"><LinkButton href="/startups" variant="outline">See all startups</LinkButton></div>
+      </Container>
+    );
+  }
   return (
     <Container>
-      <SectionHead label="Our startups" title="Startups incubated at SRIIF" sub="Only public details are shown here." />
-      {!limit && (
-        <div className="mb-6 flex flex-wrap items-center gap-2">
-          <input className="field max-w-xs" placeholder="Search startups" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search startups" />
-          {sectors.map((s) => <button key={s} onClick={() => setF(s)} className={cx("rounded-full px-3 py-1 text-sm", f === s ? "bg-brand text-white" : "bg-surface text-slate-700")}>{s}</button>)}
-        </div>
-      )}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {list.map((s) => (
-          <div key={s.name} className="flex gap-4 rounded-xl border border-slate-200 bg-white p-4">
-            <div className="display flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-mist text-xl text-brand-dark">{s.name[0]}</div>
-            <div>
-              <p className="font-semibold text-brand-dark">{s.name}</p>
-              <p className="text-sm text-slate-600">{s.desc}</p>
-              <p className="mt-1 text-xs text-slate-500">{s.sector} · {s.stage} · {s.year}</p>
-            </div>
-          </div>
-        ))}
+      <SectionHead label="Our startups" title="Startups incubated at SRIIF" sub="Only public details are shown. Click a startup to visit its website." />
+      <div className="mb-6 flex flex-wrap items-center gap-2">
+        <input className="field max-w-xs" placeholder="Search startups" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search startups" />
+        {sectors.map((s) => <button key={s} onClick={() => setF(s)} className={cx("min-h-10 rounded-full px-3 text-sm", f === s ? "bg-brand text-white" : "bg-surface text-slate-700")}>{s}</button>)}
       </div>
-      {limit && <div className="mt-6"><LinkButton href="/startups" variant="outline">See all startups</LinkButton></div>}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {list.map((s) => <Card key={s.id} s={s} />)}
+      </div>
+      {list.length === 0 && <p className="text-sm text-slate-500">No startups match.</p>}
     </Container>
   );
 }
-
-
-
 
 export function CtaBlock() {
   return (

@@ -8,7 +8,7 @@ export const metadata = { title: "Partnered services" };
 export default function Partnered() {
   return (
     <>
-      <PageHero eyebrow="Services · Partners" title="Partnered services" sub="Discounted professional services for incubated startups." img="/img/hospital.jpg">
+      <PageHero eyebrow="Services · Partners" title="Partnered services" sub="Discounted professional services for incubated startups." img="/img/hospital.webp">
         <LinkButton href={links.regulatoryForm} external variant="accent">Regulatory Connect form</LinkButton>
       </PageHero>
       <Container>

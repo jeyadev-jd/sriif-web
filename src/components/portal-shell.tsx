@@ -10,7 +10,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { NavItem } from "@/lib/nav";
-import { homeFor, today, useStore } from "@/lib/store";
+import { homeFor, useStore } from "@/lib/store";
 import type { DB, Role, User } from "@/lib/types";
 import { cx } from "./ui";
 
@@ -44,12 +44,10 @@ function badges(db: DB, user: User): Record<string, number> {
       "/portal/messages": db.messages.filter((m) => m.startupId === s.id && m.role === "admin" && !m.read).length,
     };
   }
-  return {
-    "/mentor/meetings": db.startups.flatMap((s) => s.meetings).filter((m) => m.mentorId === user.id && m.status === "Requested" && m.date >= today()).length,
-  };
+  return {};
 }
 
-const ROLE_LABEL: Record<Role, string> = { admin: "Admin console", startup: "Startup portal", mentor: "Mentor workspace" };
+const ROLE_LABEL: Record<Role, string> = { admin: "Admin console", startup: "Startup portal", mentor: "Startup portal" };
 
 export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[]; children: ReactNode }) {
   const { ready, user, logout, db } = useStore();
@@ -75,8 +73,13 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
 
   const startup = user.startupId ? db.startups.find((s) => s.id === user.startupId) : null;
   const groups = Array.from(new Set(nav.map((n) => n.group ?? "")));
-  const isActive = (href: string) => path === href || (href !== nav[0].href && path.startsWith(href + "/"));
-  const counts = badges(db, user);
+  const under = (href: string) => path === href || (href !== nav[0].href && path.startsWith(href + "/"));
+  const isActive = (n: NavItem) => (n.tabs ? n.tabs.some((t) => under(t.href)) : under(n.href));
+  const raw = badges(db, user);
+  // A sidebar item's badge is the sum of its tabs' badges.
+  const counts: Record<string, number> = Object.fromEntries(nav.map((n) => [n.href, (n.tabs?.map((t) => t.href) ?? [n.href]).reduce((a, h) => a + (raw[h] ?? 0), 0)]));
+  const current = nav.find(isActive);
+  const tabs = current?.tabs;
   const initials = user.name.replace(/^(Dr\.|Mr\.|Ms\.)\s*/, "").split(" ").map((x) => x[0]).slice(0, 2).join("");
 
   return (
@@ -84,7 +87,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
       <aside className={cx("no-print fixed inset-y-0 left-0 z-40 flex w-68 flex-col bg-brand-dark transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0", open ? "translate-x-0" : "-translate-x-full")}>
         <div className="flex items-center justify-between border-b border-white/10 p-4">
           <Link href="/" className="flex items-center gap-3">
-            <Image src={asset("/img/logo.png")} alt="SRIIF home" width={38} height={38} className="rounded-full bg-white" />
+            <Image src={asset("/img/logo-sm.png")} alt="SRIIF home" width={38} height={38} className="rounded-full bg-white" />
             <span className="text-white"><span className="block font-bold leading-tight">SRIIF</span><span className="text-xs text-white/60">{ROLE_LABEL[role]}</span></span>
           </Link>
           <button className="flex h-11 w-11 items-center justify-center rounded-lg text-white/70 hover:bg-white/10 lg:hidden" aria-label="Close menu" onClick={() => setOpen(false)}><X size={20} aria-hidden /></button>
@@ -95,7 +98,7 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
               {g && <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-white/45">{g}</p>}
               {nav.filter((n) => (n.group ?? "") === g).map((n) => {
                 const I = ICONS[n.icon] ?? House;
-                const active = isActive(n.href);
+                const active = isActive(n);
                 const c = counts[n.href] ?? 0;
                 return (
                   <Link key={n.href} href={n.href} onClick={() => setOpen(false)} aria-current={active ? "page" : undefined}
@@ -126,7 +129,23 @@ export function PortalShell({ role, nav, children }: { role: Role; nav: NavItem[
           </p>
           <Link href="/" className="hidden text-sm font-medium text-slate-600 hover:text-brand sm:block">Public site</Link>
         </header>
-        <main id="main" className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">{children}</main>
+        <main id="main" className="mx-auto w-full max-w-6xl flex-1 p-4 md:p-8">
+          {tabs && (
+            <nav aria-label={`${current.label} sections`} className="no-print -mt-2 mb-6 flex gap-1 overflow-x-auto border-b border-slate-200">
+              {tabs.map((t) => {
+                const on = under(t.href);
+                const c = raw[t.href] ?? 0;
+                return (
+                  <Link key={t.href} href={t.href} aria-current={on ? "page" : undefined}
+                    className={cx("flex min-h-11 items-center gap-2 whitespace-nowrap border-b-2 px-4 text-sm", on ? "border-brand font-semibold text-brand" : "border-transparent text-slate-500 hover:text-slate-800")}>
+                    {t.label}{c > 0 && <span className="min-w-5 rounded-full bg-accent px-1.5 text-center text-[11px] font-bold leading-5 text-brand-dark">{c}</span>}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+          {children}
+        </main>
       </div>
     </div>
   );

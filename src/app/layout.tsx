@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: { default: "SRIIF – Sri Ramachandra Innovation Incubation Foundation", template: "%s · SRIIF" },
   description: "Startup incubation at Sri Ramachandra Institute of Higher Education and Research, Chennai: workspace, mentors, labs, hospital access and funding support.",
-  icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo.png` },
+  icons: { icon: `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/img/logo-sm.png` },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

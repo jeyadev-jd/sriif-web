@@ -25,16 +25,16 @@ export const MANDATORY_KYC = ["Aadhaar / government photo ID", "PAN card"];
 export const SLOTS = ["09:00–10:00", "10:00–12:00", "12:00–14:00", "14:00–17:00", "Full day"];
 
 type Program = Startup["program"];
-const ALL: Program[] = ["Pre-Incubation", "Resident Incubation", "Virtual Incubation"];
-/** Which incubation tiers may book each facility. Virtual startups have no physical seat. */
+const ALL: Program[] = ["Pre-Incubation", "Incubation"];
+/** Which incubation tiers may book each facility. */
 export const FACILITY_RULES: Record<string, Program[]> = {
-  "Co-working Space": ["Pre-Incubation", "Resident Incubation"],
+  "Co-working Space": ["Pre-Incubation", "Incubation"],
   "Board Room": ALL,
   "Meeting Room 2": ALL,
   "Instrument Facility (wet lab)": ALL,
-  "Clinical testing lab": ["Resident Incubation", "Virtual Incubation"],
+  "Clinical testing lab": ["Incubation"],
   "Instrumentation lab": ALL,
-  "Hospital access (on request)": ["Resident Incubation", "Virtual Incubation"],
+  "Hospital access (on request)": ["Incubation"],
 };
 
 export const INQUIRY_TYPES: { type: string; desk: string }[] = [
@@ -61,7 +61,7 @@ const careloop: Startup = {
   trl: 5,
   sectors: ["HealthTech", "AI/ML"],
   stage: "MVP",
-  program: "Resident Incubation",
+  program: "Incubation",
   cohort: "Cohort 2026-A",
   onboardedOn: "2026-02-10",
   website: "https://careloop.example.in",
@@ -139,7 +139,7 @@ const greenleaf: Startup = {
   sectors: ["AgriTech"],
   stage: "Revenue",
   trl: 8,
-  program: "Virtual Incubation",
+  program: "Incubation",
   cohort: "Cohort 2025-B",
   onboardedOn: "2025-08-01",
   website: "https://greenleaf.example.in",
@@ -147,7 +147,7 @@ const greenleaf: Startup = {
   phone: "9845012345",
   oneLiner: "Soil-health IoT sensors for small farmers.",
   mentorIds: ["u-m1"],
-  seat: { type: "Virtual membership", count: 1, rate: 2000 },
+  seat: { type: "Hot desk", count: 1, rate: 2000 },
   equityTaken: false,
   docs: [{ id: "d9", type: "Certificate of Incorporation / Registration", name: "LLP_cert.pdf", version: 1, uploadedOn: "2025-08-01", financial: false }],
   founders: [{ name: "Karthik N", designation: "Founder", equity: 100, din: "" }],
@@ -163,7 +163,7 @@ const greenleaf: Startup = {
   ],
   meetings: [],
   bookings: [{ id: "b9", facility: "Instrumentation lab", date: "2026-12-02", slot: "14:00–17:00", purpose: "Sensor casing tests", status: "Pending" }],
-  invoices: [{ id: "i9", no: "SRIIF/2026/0135", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Virtual membership", sac: "998599", qty: 1, rate: 2000, amount: 2000 }], status: "Due" }],
+  invoices: [{ id: "i9", no: "SRIIF/2026/0135", period: "Nov 2026", issued: "2026-11-01", due: "2026-11-10", lines: [{ label: "Hot desk", sac: "997212", qty: 1, rate: 2000, amount: 2000 }], status: "Due" }],
   memberRequests: [],
 };
 
@@ -196,7 +196,7 @@ const cms: Cms = {
   popup: {
     enabled: true,
     title: "Applications open: Cohort 2027-A",
-    body: "Pre-Incubation, Resident and Virtual tracks. Send your request by 10 December 2026. Demo Day 2027 is on 15 January.",
+    body: "Pre-Incubation (3 months) and Incubation (6 months). Send your request by 10 December 2026. Demo Day 2027 is on 15 January.",
     ctaLabel: "Apply for incubation",
     ctaHref: "/apply",
     version: 1,
@@ -217,14 +217,14 @@ const cms: Cms = {
     { id: "e7", title: "Demo Day 2026", date: "2026-01-20", time: "10:00–17:00", place: "SRIIF Event Hall", category: "Demo Day", summary: "Cohort 2025 startups pitched to investors.", details: "Eight startups pitched; three closed follow-on meetings with investors.", registerUrl: "" },
   ],
   gallery: [
-    { id: "g1", title: "Demo Day 2026", date: "2026-01-20", category: "Demo days", img: img("herohome.jpg"), caption: "Cohort 2025 startups pitch to investors.", link: "" },
-    { id: "g2", title: "Regulatory Pathways Workshop", date: "2026-10-17", category: "Workshops", img: img("cowork.jpg"), caption: "CDSCO and ethics approvals workshop.", link: "" },
-    { id: "g3", title: "MoU with Startup TN", date: "2026-10-05", category: "MoU signings", img: img("sriif1.png"), caption: "SRIIF and Startup TN sign an ecosystem MoU.", link: "" },
-    { id: "g4", title: "Delegation visit to the labs", date: "2026-09-12", category: "Visitor delegations", img: img("lab.jpg"), caption: "Visiting delegation tours the instrument facility.", link: "" },
-    { id: "g5", title: "HealthTech Hackathon", date: "2026-11-08", category: "Workshops", img: img("cowork1.jpg"), caption: "Teams at work during the 36-hour hackathon.", link: "" },
-    { id: "g6", title: "Clinical facility tour", date: "2026-08-22", category: "Visitor delegations", img: img("clinical.jpg"), caption: "Industry partners visit the clinical trial facility.", link: "" },
-    { id: "g7", title: "GreenLeaf seed round in the news", date: "2026-11-02", category: "Press", img: img("incubation.jpg"), caption: "Press coverage of GreenLeaf Agritech's seed round.", link: "" },
-    { id: "g8", title: "Instrumentation lab opening", date: "2026-07-01", category: "MoU signings", img: img("instrument.jpg"), caption: "New shared instrumentation lab opened for incubatees.", link: "" },
+    { id: "g1", title: "Demo Day 2026", date: "2026-01-20", category: "Demo days", img: img("herohome.webp"), caption: "Cohort 2025 startups pitch to investors.", link: "" },
+    { id: "g2", title: "Regulatory Pathways Workshop", date: "2026-10-17", category: "Workshops", img: img("cowork.webp"), caption: "CDSCO and ethics approvals workshop.", link: "" },
+    { id: "g3", title: "MoU with Startup TN", date: "2026-10-05", category: "MoU signings", img: img("sriif1.webp"), caption: "SRIIF and Startup TN sign an ecosystem MoU.", link: "" },
+    { id: "g4", title: "Delegation visit to the labs", date: "2026-09-12", category: "Visitor delegations", img: img("lab.webp"), caption: "Visiting delegation tours the instrument facility.", link: "" },
+    { id: "g5", title: "HealthTech Hackathon", date: "2026-11-08", category: "Workshops", img: img("cowork1.webp"), caption: "Teams at work during the 36-hour hackathon.", link: "" },
+    { id: "g6", title: "Clinical facility tour", date: "2026-08-22", category: "Visitor delegations", img: img("clinical.webp"), caption: "Industry partners visit the clinical trial facility.", link: "" },
+    { id: "g7", title: "GreenLeaf seed round in the news", date: "2026-11-02", category: "Press", img: img("incubation.webp"), caption: "Press coverage of GreenLeaf Agritech's seed round.", link: "" },
+    { id: "g8", title: "Instrumentation lab opening", date: "2026-07-01", category: "MoU signings", img: img("instrument.webp"), caption: "New shared instrumentation lab opened for incubatees.", link: "" },
   ],
   testimonials: [
     { id: "ts1", kind: "Founder", name: "Karthik N", role: "Founder", org: "GreenLeaf Agritech", quote: "SRIIF gave us a lab, mentors and our first pilot farms. We went from a campus prototype to 2,000 farmers in two years.", stat: "2,000 farms" },
@@ -239,6 +239,23 @@ const cms: Cms = {
     { id: "bd4", name: "To be announced", role: "Investment advisor", bio: "Angel and venture investment expertise.", img: "" },
   ],
   social: { linkedin: "", x: "", instagram: "", youtube: "" },
+  slides: [
+    { id: "sl1", title: "Turning research into ventures", sub: "Labs, hospital access and co-working on one campus at SRIHER, Chennai.", img: img("herohome.webp"), ctaLabel: "Apply for incubation", ctaHref: "/apply", show: true },
+    { id: "sl2", title: "Cohort 2027-A applications open", sub: "Pre-Incubation (3 months) and Incubation (6 months). Apply by 10 December 2026.", img: img("incubation.webp"), ctaLabel: "See programs", ctaHref: "/incubation", show: true },
+    { id: "sl3", title: "Book labs and instruments", sub: "Wet lab, clinical testing and instrumentation labs for incubated startups.", img: img("lab.webp"), ctaLabel: "Tour facilities", ctaHref: "/facilities", show: true },
+    { id: "sl4", title: "Demo Day 2027 on 15 January", sub: "Startups pitch to investors, hospital leaders and corporate partners.", img: img("cowork.webp"), ctaLabel: "Events calendar", ctaHref: "/events", show: true },
+  ],
+  showcase: [
+    { id: "sc1", name: "GreenLeaf Agritech", sector: "AgriTech", desc: "Soil-health IoT sensors for small farmers.", year: "2025", stage: "Early revenue", logo: "", website: "https://greenleaf.example.in", show: true },
+    { id: "sc2", name: "CareLoop Health", sector: "HealthTech", desc: "Remote patient monitoring platform.", year: "2026", stage: "Prototype", logo: "", website: "https://careloop.example.in", show: true },
+    { id: "sc3", name: "VoiceBridge", sector: "AI", desc: "Regional-language voice assistants.", year: "2026", stage: "Prototype", logo: "", website: "https://voicebridge.example.in", show: true },
+    { id: "sc4", name: "Bails Sports", sector: "SportsTech", desc: "Marketplace for players and coaches.", year: "2024", stage: "Seed funded", logo: "", website: "https://bails.example.in", show: true },
+    { id: "sc5", name: "EduNext", sector: "EdTech", desc: "Adaptive learning platform for schools.", year: "2024", stage: "Growth", logo: "", website: "https://edunext.example.in", show: true },
+    { id: "sc6", name: "AquaPure", sector: "CleanTech", desc: "Decentralised water purification units.", year: "2023", stage: "Pilot", logo: "", website: "https://aquapure.example.in", show: true },
+    { id: "sc7", name: "FinEase", sector: "FinTech", desc: "Micro-lending app for small merchants.", year: "2025", stage: "Seed funded", logo: "", website: "https://finease.example.in", show: false },
+    { id: "sc8", name: "RoboCart", sector: "Robotics", desc: "Warehouse automation robots.", year: "2023", stage: "Early revenue", logo: "", website: "https://robocart.example.in", show: true },
+    { id: "sc9", name: "BioHarvest", sector: "AgriTech", desc: "Bio-fertiliser from agri waste.", year: "2022", stage: "Graduated", logo: "", website: "https://bioharvest.example.in", show: true },
+  ],
 };
 
 export const seed: DB = {

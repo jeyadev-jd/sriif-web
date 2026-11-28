@@ -7,7 +7,7 @@ export const metadata = { title: "Funding" };
 export default function Funding() {
   return (
     <>
-      <PageHero eyebrow="Funding" title="Grants, angels and government schemes" sub="SRIIF connects incubated startups to grants and investors. Investors meet startups through SRIIF events, not through the portal." img="/img/herohome.jpg" />
+      <PageHero eyebrow="Funding" title="Grants, angels and government schemes" sub="SRIIF connects incubated startups to grants and investors. Investors meet startups through SRIIF events, not through the portal." img="/img/herohome.webp" />
       <Container>
         <SectionHead label="Support" title="How we help you raise" />
         <div className="grid gap-5 md:grid-cols-2">

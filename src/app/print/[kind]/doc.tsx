@@ -20,7 +20,7 @@ function Sheet({ title, children, sub }: { title: string; sub?: string; children
         <button onClick={() => window.print()} className="rounded bg-brand px-3 py-1 font-semibold text-white">Print / Save PDF</button>
       </div>
       <header className="flex items-center gap-4 border-b-2 border-brand pb-4">
-        <Image src={asset("/img/logo.png")} alt="" width={56} height={56} />
+        <Image src={asset("/img/logo-sm.png")} alt="" width={56} height={56} />
         <div>
           <p className="text-lg font-bold text-brand">{brand.fullName}</p>
           <p className="text-xs text-slate-600">{brand.address}</p>
@@ -119,18 +119,20 @@ function Doc() {
       const i = s.invoices.find((x) => x.id === q.get("iid"));
       if (!i) return <p className="p-10">Invoice not found.</p>;
       if (kind === "receipt" && i.status !== "Paid") return <p className="p-10">Receipt is issued after payment is verified.</p>;
-      const t = invoiceTotals(i.lines, brand.gstRate);
+      const t = invoiceTotals(i.lines, brand.gstRate, i.discount);
       return (
-        <Sheet title={kind === "invoice" ? "Tax invoice" : "Payment receipt"} sub={kind === "invoice" ? `${i.no} · ${i.period}` : `${i.receiptNo} · against ${i.no}`}>
+        <Sheet title={kind === "invoice" ? "Tax invoice" : "Payment receipt"} sub={kind === "invoice" ? `${i.no} · ${i.title || i.period}` : `${i.receiptNo} · against ${i.no}`}>
           <KV rows={[["Supplier", `${brand.fullName}, ${brand.address}`], ["Billed to", `${s.name}, ${s.regAddress}`], ["Recipient GSTIN", s.gstin || "Unregistered"], ["Place of supply", "Tamil Nadu (33)"], ["Issued", fmtDate(i.issued)], ["Due", fmtDate(i.due)], ...(kind === "receipt" ? [["Paid on", fmtDate(i.paidOn)], ["Reference (UTR)", i.utr ?? "—"]] as [string, string][] : [])]} />
           <table className="mt-6 w-full text-sm"><thead><tr className="border-b-2 text-left"><th className="py-1">Description</th><th className="py-1">SAC</th><th className="py-1 text-right">Qty</th><th className="py-1 text-right">Rate</th><th className="py-1 text-right">Amount</th></tr></thead>
             <tbody>
               {i.lines.map((l, k) => <tr key={k} className="border-b"><td className="py-1">{l.label}</td><td className="py-1">{l.sac ?? "—"}</td><td className="py-1 text-right">{l.qty ?? 1}</td><td className="py-1 text-right">{inr(l.rate ?? l.amount)}</td><td className="py-1 text-right">{inr(l.amount)}</td></tr>)}
+              {t.discount > 0 && <tr><td colSpan={4} className="py-1 text-right">Less: discount</td><td className="py-1 text-right">−{inr(t.discount)}</td></tr>}
               <tr><td colSpan={4} className="py-1 text-right">Taxable value</td><td className="py-1 text-right">{inr(t.sub)}</td></tr>
               <tr><td colSpan={4} className="py-1 text-right">CGST @ {brand.gstRate * 50}%</td><td className="py-1 text-right">{inr(t.cgst)}</td></tr>
               <tr><td colSpan={4} className="py-1 text-right">SGST @ {brand.gstRate * 50}%</td><td className="py-1 text-right">{inr(t.sgst)}</td></tr>
               <tr className="font-bold"><td colSpan={4} className="py-1 text-right">{kind === "invoice" ? "Total payable" : "Amount received"}</td><td className="py-1 text-right">{inr(t.total)}</td></tr>
             </tbody></table>
+          {i.notes && <p className="mt-3 text-sm"><b>Notes:</b> {i.notes}</p>}
           {kind === "receipt" && <p className="mt-8 text-center text-lg font-bold text-emerald-700">PAID</p>}
         </Sheet>
       );

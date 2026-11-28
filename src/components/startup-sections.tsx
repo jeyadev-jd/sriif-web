@@ -77,7 +77,7 @@ export function ProfileSection({ s, mode }: P) {
               })}
             </div>
           </div>
-          <Field label="Program">{mode === "admin" ? <select className="field" {...bind("program")}>{["Pre-Incubation", "Resident Incubation", "Virtual Incubation"].map((x) => <option key={x}>{x}</option>)}</select> : <input className="field" value={s.program} readOnly />}</Field>
+          <Field label="Program">{mode === "admin" ? <select className="field" {...bind("program")}>{["Pre-Incubation", "Incubation"].map((x) => <option key={x}>{x}</option>)}</select> : <input className="field" value={s.program} readOnly />}</Field>
           <Field label="Incubation cohort"><input className="field" {...bind("cohort")} readOnly={mode !== "admin"} /></Field>
           <Field label="Onboarding date"><input className="field" type="date" {...bind("onboardedOn")} readOnly={mode !== "admin"} /></Field>
           <Field label="Status">{mode === "admin" ? <select className="field" {...bind("status")}>{["Active", "Graduated", "Exited"].map((x) => <option key={x}>{x}</option>)}</select> : <input className="field" value={s.status} readOnly />}</Field>
@@ -512,7 +512,7 @@ export function FacilitiesSection({ s, mode }: P) {
   return (
     <div className="grid gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Stat label="Incubation tier" value={s.program.replace(" Incubation", "")} note={s.program === "Virtual Incubation" ? "No physical seat" : "On-campus access"} />
+        <Stat label="Incubation tier" value={s.program.replace(" Incubation", "")} note={s.program === "Pre-Incubation" ? "3 months" : "6 months"} />
         <Stat label="Seat allocation" value={`${s.seat.type} × ${s.seat.count}`} note="Allocated by SRIIF" />
         <Stat label="Access card" value={s.status === "Active" ? "Active" : "Revoked"} note="Issued by SRIIF office" />
       </div>
@@ -558,8 +558,8 @@ export function InvoicesSection({ s, mode }: P) {
   const [period, setPeriod] = useState("");
   if (mode === "mentor") return <Empty>Not available for mentors.</Empty>;
   const shown = (i: Startup["invoices"][number]) => i.status === "Due" && i.utr ? "Pending" : i.status === "Due" && i.due < today() ? "Overdue" : i.status;
-  const due = s.invoices.filter((i) => i.status === "Due").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
-  const paid = s.invoices.filter((i) => i.status === "Paid").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate).total, 0);
+  const due = s.invoices.filter((i) => i.status === "Due").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate, i.discount).total, 0);
+  const paid = s.invoices.filter((i) => i.status === "Paid").reduce((a, i) => a + invoiceTotals(i.lines, brand.gstRate, i.discount).total, 0);
   const viewing = s.invoices.find((i) => i.id === view);
   const openEditor = (id: string | "new") => {
     const i = s.invoices.find((x) => x.id === id);
@@ -578,7 +578,7 @@ export function InvoicesSection({ s, mode }: P) {
       {!s.gstin && mode === "startup" && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">Add your GSTIN in Profile & pitch deck so it is printed on your tax invoices.</p>}
       <Card title="Invoices" action={mode === "admin" && <Button size="sm" className="min-h-10" onClick={() => openEditor("new")}>+ Raise invoice</Button>}>
         <Table head={["Invoice", "Period", "Due", "Taxable", "GST", "Total", "Status", "Documents", ""]} rows={[...s.invoices].reverse().map((i) => {
-          const t = invoiceTotals(i.lines, brand.gstRate);
+          const t = invoiceTotals(i.lines, brand.gstRate, i.discount);
           const st = shown(i);
           return [
             <button key="n" className="min-h-10 font-medium text-brand underline" onClick={() => setView(i.id)}>{i.no}</button>, i.period, fmtDate(i.due), inr(t.sub), inr(t.gst), <b key="t">{inr(t.total)}</b>, <Badge key="b">{st}</Badge>,
@@ -609,7 +609,8 @@ export function InvoicesSection({ s, mode }: P) {
               <p><span className="block text-xs text-slate-500">Issued · due</span>{fmtDate(viewing.issued)} · {fmtDate(viewing.due)}</p>
               <p><span className="block text-xs text-slate-500">Status</span><Badge>{shown(viewing)}</Badge>{viewing.paidOn && <span className="block text-xs text-slate-500">Paid {fmtDate(viewing.paidOn)} · {viewing.receiptNo}</span>}</p>
             </div>
-            <LineTable lines={viewing.lines} />
+            <LineTable lines={viewing.lines} discount={viewing.discount} />
+            {viewing.notes && <p className="text-sm text-slate-600"><b>Notes:</b> {viewing.notes}</p>}
           </div>
         )}
       </Modal>

@@ -123,7 +123,13 @@ export type Invoice = {
   issued: string;
   due: string;
   lines: InvoiceLine[];
-  status: "Due" | "Paid" | "Waived";
+  status: "Due" | "Paid" | "Waived" | "Cancelled";
+  /** Custom invoices: free-form title, discount and notes. */
+  kind?: "Monthly" | "Custom";
+  title?: string;
+  discount?: number; // flat amount off the taxable value
+  notes?: string;
+  payments?: { id: string; amount: number; on: string; ref: string; mode: string }[];
   paidOn?: string;
   receiptNo?: string;
   utr?: string; // payment reference sent by startup, verified by admin
@@ -139,7 +145,7 @@ export type Startup = {
   trl: number;
   sectors: string[];
   stage: "Idea" | "MVP" | "Revenue" | "Scaling";
-  program: "Pre-Incubation" | "Resident Incubation" | "Virtual Incubation";
+  program: "Pre-Incubation" | "Incubation";
   cohort: string;
   onboardedOn: string;
   website: string;
@@ -241,7 +247,10 @@ export type Kpi = { id: string; label: string; value: string; note: string; auto
 export type Popup = { enabled: boolean; title: string; body: string; ctaLabel: string; ctaHref: string; version: number };
 export type Person = { id: string; name: string; role: string; bio: string; img: string };
 export type Social = { linkedin: string; x: string; instagram: string; youtube: string };
-export type Cms = { popup: Popup; kpis: Kpi[]; events: SiteEvent[]; gallery: GalleryItem[]; testimonials: Testimonial[]; board: Person[]; social: Social };
+export type Slide = { id: string; title: string; sub: string; img: string; ctaLabel: string; ctaHref: string; show: boolean };
+/** Startup shown on the home page; clicking opens its own website. */
+export type Showcase = { id: string; name: string; sector: string; desc: string; stage: string; year: string; logo: string; website: string; show: boolean };
+export type Cms = { popup: Popup; kpis: Kpi[]; events: SiteEvent[]; gallery: GalleryItem[]; testimonials: Testimonial[]; board: Person[]; social: Social; slides: Slide[]; showcase: Showcase[] };
 export type AuditEntry = { at: string; by: string; action: string };
 
 export type DB = {

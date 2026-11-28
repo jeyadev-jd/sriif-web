@@ -6,7 +6,7 @@ export const metadata = { title: "Startups" };
 export default function Startups() {
   return (
     <>
-      <PageHero eyebrow="Portfolio" title="Startups incubated at SRIIF" sub="Search or filter by sector." img="/img/incubation.jpg" />
+      <PageHero eyebrow="Portfolio" title="Startups incubated at SRIIF" sub="Search or filter by sector." img="/img/incubation.webp" />
       <StartupsBlock />
       <TestimonialsBlock />
       <CtaBlock />

@@ -13,7 +13,7 @@ import { cx, LinkButton } from "./ui";
 export function Logo({ light }: { light?: boolean }) {
   return (
     <Link href="/" className="flex items-center gap-3">
-      <Image src={asset("/img/logo.png")} alt="SRIIF logo" width={44} height={44} className="rounded-full bg-white" priority />
+      <Image src={asset("/img/logo-sm.png")} alt="SRIIF logo" width={44} height={44} className="rounded-full bg-white" priority />
       <span className="leading-tight">
         <span className={cx("block text-lg font-extrabold tracking-wide", light ? "text-white" : "text-brand")}>{brand.name}</span>
         <span className={cx("hidden text-[11px] sm:block", light ? "text-white/70" : "text-slate-500 xl:hidden 2xl:block")}>{brand.fullName}</span>
@@ -111,7 +111,7 @@ export function SocialBadges({ dark }: { dark?: boolean }) {
 
 const FOOT: [string, [string, string][]][] = [
   ["About", [["About SRIIF", "/about"], ["Our team", "/about/team"], ["Board & advisors", "/about/board"], ["Partners", "/services/partners"], ["Portfolio startups", "/startups"], ["FAQs", "/faq"]]],
-  ["Programs", [["Pre-Incubation", "/incubation/pre-incubation"], ["Resident Incubation", "/incubation/resident"], ["Virtual Incubation", "/incubation/virtual"], ["Facilities", "/facilities"], ["Funding support", "/funding"], ["Apply for Incubation", "/apply"]]],
+  ["Programs", [["Pre-Incubation", "/incubation/pre-incubation"], ["Incubation", "/incubation/incubation"], ["Facilities", "/facilities"], ["Funding support", "/funding"], ["Apply for Incubation", "/apply"]]],
   ["Get involved", [["Events calendar", "/events"], ["Media & Gallery", "/media"], ["Join Us", "/join"], ["Contact Us", "/contact"], ["Portal login", "/login"]]],
 ];
 

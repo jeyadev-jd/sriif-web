@@ -52,8 +52,7 @@ export const nav: NavLink[] = [
     href: "/incubation",
     children: [
       { label: "Pre-Incubation (3 months)", href: "/incubation/pre-incubation" },
-      { label: "Resident Incubation (6 months)", href: "/incubation/resident" },
-      { label: "Virtual Incubation (6 months)", href: "/incubation/virtual" },
+      { label: "Incubation (6 months)", href: "/incubation/incubation" },
       { label: "Funding support", href: "/funding" },
       { label: "Apply for Incubation", href: "/apply" },
     ],
@@ -73,8 +72,6 @@ export const nav: NavLink[] = [
   { label: "Join Us", href: "/join" },
   { label: "Contact Us", href: "/contact" },
 ];
-
-export const heroWords = ["scalable businesses", "deep-tech ventures", "social impact", "global brands"];
 
 export const about = {
   intro:
@@ -122,33 +119,22 @@ export const programs: Program[] = [
     title: "Pre-Incubation",
     duration: "3 months",
     desc: "Validate the idea, build a first prototype and shape the business model before you commit to full incubation.",
-    img: `${BASE}/img/preincubation.jpg`,
+    img: `${BASE}/img/preincubation.webp`,
     stage: "Idea stage",
     bullets: ["Idea validation workshops", "Prototype development support", "Business model structuring", "Mentor reviews"],
     eligibility: ["Students, faculty, alumni or outside founders", "An idea or early prototype (TRL 1–3)", "Company registration not needed yet"],
-    deliverables: ["Validated problem statement", "Working prototype or proof of concept", "Business model canvas and pitch deck", "Go / no-go review for Resident or Virtual Incubation"],
+    deliverables: ["Validated problem statement", "Working prototype or proof of concept", "Business model canvas and pitch deck", "Go / no-go review for Incubation"],
   },
   {
-    slug: "resident",
-    title: "Resident Incubation",
+    slug: "incubation",
+    title: "Incubation",
     duration: "6 months",
     desc: "A seat on campus, lab infrastructure and intensive commercialization support while you build and launch.",
-    img: `${BASE}/img/incubation.jpg`,
+    img: `${BASE}/img/incubation.webp`,
     stage: "Prototype to revenue",
     bullets: ["Dedicated seat or cabin", "Lab, instrument and hospital access", "Commercialization, legal, IP and GST support", "Investor demo days"],
     eligibility: ["Registered startup (Pvt Ltd or LLP)", "Working prototype (TRL 4 or above)", "At least one full-time founder on campus"],
     deliverables: ["Pilot or first paying customers", "IP filing plan and regulatory pathway", "Quarterly progress reviews with SRIIF", "Investor-ready pitch at Demo Day"],
-  },
-  {
-    slug: "virtual",
-    title: "Virtual Incubation",
-    duration: "6 months",
-    desc: "Remote access to the SRIIF ecosystem, compliance support and investor and network linkages, without a physical seat.",
-    img: `${BASE}/img/accelaration.jpg`,
-    stage: "Any stage",
-    bullets: ["Remote mentor reviews", "Compliance and documentation support", "Investor and network linkages", "Pay-per-use labs and meeting rooms"],
-    eligibility: ["Registered startup anywhere in India", "Product in development or in market", "Able to attend reviews online"],
-    deliverables: ["Compliance checklist completed", "Investor introductions", "Quarterly progress reviews with SRIIF", "Access to SRIIF events and Demo Day"],
   },
 ];
 
@@ -161,12 +147,12 @@ export const journey = [
 ];
 
 export const facilities = [
-  { title: "Co-working Space", tag: "30 seats", desc: "Desks, cabins and cubicles with internet access.", img: `${BASE}/img/cowork1.jpg` },
-  { title: "Instrument Facility", tag: "Wet lab", desc: "RT-PCR, -80 °C freezers and tools.", img: `${BASE}/img/lab.jpg` },
-  { title: "Board Room", tag: "30 people", desc: "Bookable rooms with video-conferencing.", img: `${BASE}/img/cowork.jpg` },
-  { title: "Hospital access", tag: "On request", desc: "1200-bed tertiary hospital; shared analytical instruments billed by usage.", img: `${BASE}/img/hospital.jpg` },
-  { title: "Clinical", tag: "Testing lab", desc: "CDSCO-approved clinical trial facility for testing and trials.", img: `${BASE}/img/clinical.jpg` },
-  { title: "Instrumentation lab", tag: "Shared", desc: "Instrumentation lab and GLP-accredited small animal facility.", img: `${BASE}/img/instrument.jpg` },
+  { title: "Co-working Space", tag: "30 seats", desc: "Desks, cabins and cubicles with internet access.", img: `${BASE}/img/cowork1.webp` },
+  { title: "Instrument Facility", tag: "Wet lab", desc: "RT-PCR, -80 °C freezers and tools.", img: `${BASE}/img/lab.webp` },
+  { title: "Board Room", tag: "30 people", desc: "Bookable rooms with video-conferencing.", img: `${BASE}/img/cowork.webp` },
+  { title: "Hospital access", tag: "On request", desc: "1200-bed tertiary hospital; shared analytical instruments billed by usage.", img: `${BASE}/img/hospital.webp` },
+  { title: "Clinical", tag: "Testing lab", desc: "CDSCO-approved clinical trial facility for testing and trials.", img: `${BASE}/img/clinical.webp` },
+  { title: "Instrumentation lab", tag: "Shared", desc: "Instrumentation lab and GLP-accredited small animal facility.", img: `${BASE}/img/instrument.webp` },
 ];
 
 export const partners: { title: string; tag: string; desc: string; url: string }[] = [
@@ -190,7 +176,7 @@ export const partneredServices = [
 ];
 
 export const team = [
-  { name: "Dr. Vidya Ramkumar", role: "Faculty Incharge", desc: "Leads the incubation centre.", img: `${BASE}/img/vidya.jpg` },
+  { name: "Dr. Vidya Ramkumar", role: "Faculty Incharge", desc: "Leads the incubation centre.", img: `${BASE}/img/vidya.webp` },
   { name: "Mr. Ganesh Saravanan", role: "Manager", desc: "Manages the incubation centre.", img: "" },
   { name: "Mr. S. Venkat", role: "Head – Mentor Network", desc: "Connects startups with domain mentors.", img: "" },
   { name: "Ms. P. Harish", role: "Community Lead", desc: "Events, founder meetups and outreach.", img: "" },
@@ -203,18 +189,6 @@ export const mentors = [
   { name: "Divya Menon", area: "Marketing & Sales", role: "Growth Advisor", desc: "Helps with first customers and pricing.", tags: ["GTM", "Pricing", "Sales"] },
   { name: "Rahul Verma", area: "Deep-tech", role: "Research Scientist", desc: "Supports hardware and science-based ventures.", tags: ["R&D", "Prototyping", "Patents"] },
   { name: "Sunita Iyer", area: "HealthTech", role: "Physician & Founder", desc: "Advises on trials, regulation and clinical partnerships.", tags: ["Clinical", "Regulatory", "Hospitals"] },
-];
-
-export const publicStartups = [
-  { name: "GreenLeaf Agritech", sector: "AgriTech", desc: "Soil-health IoT sensors for small farmers.", year: "2025", stage: "Early revenue" },
-  { name: "Bails Sports", sector: "SportsTech", desc: "Marketplace for players and coaches.", year: "2024", stage: "Seed funded" },
-  { name: "EduNext", sector: "EdTech", desc: "Adaptive learning platform for schools.", year: "2024", stage: "Growth" },
-  { name: "AquaPure", sector: "CleanTech", desc: "Decentralised water purification units.", year: "2023", stage: "Pilot" },
-  { name: "FinEase", sector: "FinTech", desc: "Micro-lending app for small merchants.", year: "2025", stage: "Seed funded" },
-  { name: "RoboCart", sector: "Robotics", desc: "Warehouse automation robots.", year: "2023", stage: "Early revenue" },
-  { name: "VoiceBridge", sector: "AI", desc: "Regional-language voice assistants.", year: "2026", stage: "Prototype" },
-  { name: "BioHarvest", sector: "AgriTech", desc: "Bio-fertiliser from agri waste.", year: "2022", stage: "Graduated" },
-  { name: "CareLoop", sector: "HealthTech", desc: "Remote patient monitoring platform.", year: "2026", stage: "Prototype" },
 ];
 
 export const funding = [
@@ -230,15 +204,15 @@ export const faqs: { cat: (typeof faqCategories)[number]; q: string; a: string }
   { cat: "Applications & timelines", q: "Who can apply?", a: "Students, faculty, alumni and outside founders with a scalable idea." },
   { cat: "Applications & timelines", q: "How do I join SRIIF?", a: "Email SRIIF or fill the application form. If selected, the SRIIF admin onboards your team and creates your portal login. There is no self sign-up." },
   { cat: "Applications & timelines", q: "When are applications open?", a: "Requests are accepted all year. Cohorts start in January and July; check the pop-up and Events page for the current deadline." },
-  { cat: "Applications & timelines", q: "How long is each program?", a: "Pre-Incubation runs for 3 months, Resident and Virtual Incubation for 6 months each. Extensions are decided at the progress review." },
+  { cat: "Applications & timelines", q: "How long is each program?", a: "Pre-Incubation runs for 3 months and Incubation for 6 months. Extensions are decided at the progress review." },
   { cat: "Cohort selection", q: "How are startups selected?", a: "The SRIIF team screens each request, meets the founders and invites shortlisted teams to pitch to a selection panel." },
   { cat: "Cohort selection", q: "What does the panel look for?", a: "A clear problem, a capable team, feasibility of the technology, market potential and fit with SRIIF focus sectors." },
-  { cat: "Cohort selection", q: "Which track should I choose?", a: "Pre-Incubation for ideas, Resident for teams that need a seat and labs on campus, Virtual for registered startups that work remotely. The panel can suggest a different track." },
+  { cat: "Cohort selection", q: "Which track should I choose?", a: "Pre-Incubation for ideas and early prototypes; Incubation for registered startups ready to build, pilot and sell with a seat and labs on campus. The panel can suggest a different track." },
   { cat: "Fees & equity", q: "How is rent charged?", a: "Seats are billed monthly, with GST and the instrument usage tariff added. Invoices and receipts are available in the startup portal." },
   { cat: "Fees & equity", q: "Do you take equity?", a: "Terms are shared during onboarding; SRIIF management defines them." },
   { cat: "IP policy", q: "Who owns the IP I build at SRIIF?", a: "IP terms are part of the incubation agreement shared during onboarding. Founders get support for patent and trademark filing through partnered legal firms." },
   { cat: "IP policy", q: "Can faculty and students take institute IP into a startup?", a: "This follows the SRIHER IP and technology transfer policy. The SRIIF team guides you through the approval and licensing process." },
-  { cat: "Facility access", q: "Can I use the labs without a seat?", a: "Yes. Instruments are available on a pay-per-use basis. Virtual incubatees book labs and meeting rooms from the portal." },
+  { cat: "Facility access", q: "Can I use the labs without a seat?", a: "Yes. Instruments are available on a pay-per-use basis. Incubated startups book labs and meeting rooms from the portal." },
   { cat: "Facility access", q: "How do I book facilities?", a: "Incubated startups book rooms, labs and seats from the portal. SRIIF approves each booking and usage is added to the monthly invoice." },
 ];
 

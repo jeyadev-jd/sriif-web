@@ -9,7 +9,7 @@ export const metadata = { title: "Apply for Incubation" };
 export default function Apply() {
   return (
     <>
-      <PageHero eyebrow="Apply for Incubation" title="Tell us about your idea" sub="There is no self sign-up. Send your request by email or the application form. The SRIIF team reviews it, meets you, and if selected, onboards your whole team and creates your portal logins." img="/img/preincubation.jpg" />
+      <PageHero eyebrow="Apply for Incubation" title="Tell us about your idea" sub="There is no self sign-up. Send your request by email or the application form. The SRIIF team reviews it, meets you, and if selected, onboards your whole team and creates your portal logins." img="/img/preincubation.webp" />
       <Container className="grid gap-8 lg:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-6">
           <h2 className="text-xl font-bold text-brand-dark">Option 1 · Email SRIIF</h2>

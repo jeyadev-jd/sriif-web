@@ -1,7 +1,7 @@
 "use client";
 
 // Website content manager: pop-up, impact numbers, events and brochures, gallery, testimonials, board, social links.
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -10,27 +10,28 @@ import { Badge, Button, Card, cx, Field, Modal, PageTitle, readFile, Table } fro
 import { fmtDate, uid, useStore } from "@/lib/store";
 import type { Cms, EventCategory } from "@/lib/types";
 
-const TABS = ["Pop-up", "Impact numbers", "Events", "Gallery", "Testimonials", "Board", "Social links"] as const;
+const TABS = ["Hero slider", "Startup showcase", "Pop-up", "Impact numbers", "Events", "Gallery", "Testimonials", "Board", "Social links"] as const;
 const EVENT_CATS: EventCategory[] = ["Demo Day", "Workshop", "Investor Connect", "Meetup", "Hackathon", "Clinic"];
 const MAX_IMG = 800_000;
 const MAX_PDF = 1_500_000;
 
-type FieldDef = { key: string; label: string; type?: "text" | "textarea" | "date" | "select" | "image" | "pdf"; options?: readonly string[]; required?: boolean; hint?: string; wide?: boolean };
+type FieldDef = { key: string; label: string; type?: "text" | "textarea" | "date" | "select" | "image" | "pdf" | "checkbox"; options?: readonly string[]; required?: boolean; hint?: string; wide?: boolean };
 type Row = { id: string } & Record<string, unknown>;
 
 /** Generic add / edit / delete list for one CMS collection. */
-function Editor({ title, rows, head, cells, fields, blank, onSave, onDelete }: {
+function Editor({ title, rows, head, cells, fields, blank, onSave, onDelete, onMove, extra }: {
   title: string; rows: Row[]; head: string[]; cells: (r: Row) => React.ReactNode[]; fields: FieldDef[];
-  blank: () => Row; onSave: (r: Row) => void; onDelete: (id: string) => void;
+  blank: () => Row; onSave: (r: Row) => void; onDelete: (id: string) => void; onMove?: (id: string, dir: -1 | 1) => void; extra?: React.ReactNode;
 }) {
   const [edit, setEdit] = useState<Row | null>(null);
   const [err, setErr] = useState("");
   const isNew = edit ? !rows.some((r) => r.id === edit.id) : false;
   const set = (k: string, v: unknown) => setEdit((e) => (e ? { ...e, [k]: v } : e));
   return (
-    <Card title={title} action={<Button size="sm" className="min-h-10" onClick={() => { setErr(""); setEdit(blank()); }}><Plus size={16} aria-hidden />Add</Button>}>
+    <Card title={title} action={<span className="flex flex-wrap gap-2">{extra}<Button size="sm" className="min-h-10" onClick={() => { setErr(""); setEdit(blank()); }}><Plus size={16} aria-hidden />Add</Button></span>}>
       <Table head={[...head, ""]} rows={rows.map((r) => [...cells(r),
         <span key="a" className="flex gap-1">
+          {onMove && <><button aria-label="Move up" className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100" onClick={() => onMove(r.id, -1)}><ArrowUp size={16} aria-hidden /></button><button aria-label="Move down" className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100" onClick={() => onMove(r.id, 1)}><ArrowDown size={16} aria-hidden /></button></>}
           <button aria-label="Edit" className="flex h-10 w-10 items-center justify-center rounded-lg text-brand hover:bg-brand-50" onClick={() => { setErr(""); setEdit(structuredClone(r)); }}><Pencil size={16} aria-hidden /></button>
           <button aria-label="Delete" className="flex h-10 w-10 items-center justify-center rounded-lg text-red-600 hover:bg-red-50" onClick={() => { if (window.confirm("Delete this item from the website?")) onDelete(r.id); }}><Trash2 size={16} aria-hidden /></button>
         </span>])} />
@@ -40,6 +41,7 @@ function Editor({ title, rows, head, cells, fields, blank, onSave, onDelete }: {
             {fields.map((f) => {
               const v = edit[f.key];
               const cls = f.wide || f.type === "textarea" ? "sm:col-span-2" : undefined;
+              if (f.type === "checkbox") return <label key={f.key} className="flex min-h-11 items-center gap-2 text-sm sm:col-span-2"><input type="checkbox" className="h-5 w-5" checked={!!v} onChange={(e) => set(f.key, e.target.checked)} />{f.label}</label>;
               if (f.type === "textarea") return <Field key={f.key} label={f.label} hint={f.hint} className={cls}><textarea className="field min-h-24" required={f.required} value={String(v ?? "")} onChange={(e) => set(f.key, e.target.value)} /></Field>;
               if (f.type === "select") return <Field key={f.key} label={f.label} hint={f.hint} className={cls}><select className="field" value={String(v ?? "")} onChange={(e) => set(f.key, e.target.value)}>{f.options!.map((o) => <option key={o}>{o}</option>)}</select></Field>;
               if (f.type === "image") return (
@@ -75,9 +77,9 @@ function Editor({ title, rows, head, cells, fields, blank, onSave, onDelete }: {
 
 export default function CmsPage() {
   const { db, update } = useStore();
-  const [tab, setTab] = useState<(typeof TABS)[number]>("Pop-up");
+  const [tab, setTab] = useState<(typeof TABS)[number]>("Hero slider");
   const cms = db.cms;
-  type Coll = "kpis" | "events" | "gallery" | "testimonials" | "board";
+  type Coll = "kpis" | "events" | "gallery" | "testimonials" | "board" | "slides" | "showcase";
   const save = (coll: Coll, label: string) => (r: Row) => update((d) => {
     const list = d.cms[coll] as unknown as Row[];
     const i = list.findIndex((x) => x.id === r.id);
@@ -85,13 +87,41 @@ export default function CmsPage() {
   }, `Website: saved ${label}`);
   const del = (coll: Coll, label: string) => (id: string) => update((d) => { (d.cms[coll] as unknown as Row[]).splice((d.cms[coll] as unknown as Row[]).findIndex((x) => x.id === id), 1); }, `Website: deleted ${label}`);
   const rows = <K extends Coll>(k: K) => cms[k] as unknown as Row[];
+  const move = (coll: Coll) => (id: string, dir: -1 | 1) => update((d) => {
+    const list = d.cms[coll] as unknown as Row[];
+    const i = list.findIndex((x) => x.id === id), j = i + dir;
+    if (i < 0 || j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+  });
+  const shown = (r: Row) => (r.show ? <Badge key="s" tone="green">Shown</Badge> : <Badge key="s">Hidden</Badge>);
+  const notListed = db.startups.filter((s) => !cms.showcase.some((x) => x.name === s.name));
+  const importStartups = () => update((d) => {
+    notListed.forEach((s) => d.cms.showcase.push({ id: uid(), name: s.name, sector: s.sectors[0] ?? "", desc: s.oneLiner, stage: s.stage, year: s.onboardedOn.slice(0, 4), logo: s.logo, website: s.website, show: false }));
+  }, `Website: imported ${notListed.length} portal startup(s) to showcase`);
 
   return (
     <>
-      <PageTitle title="Website content" sub="Update the public website without code changes. Changes publish immediately." action={<Link href="/" target="_blank" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"><ExternalLink size={16} aria-hidden />View site</Link>} />
+      <PageTitle title="Website content" sub="Hero slider, startup showcase, events, gallery and more. Changes publish immediately." action={<Link href="/" target="_blank" className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-50"><ExternalLink size={16} aria-hidden />View site</Link>} />
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-slate-200" role="tablist">
         {TABS.map((t) => <button key={t} role="tab" aria-selected={tab === t} onClick={() => setTab(t)} className={cx("min-h-11 whitespace-nowrap border-b-2 px-4 text-sm", tab === t ? "border-brand font-semibold text-brand" : "border-transparent text-slate-500 hover:text-slate-800")}>{t}</button>)}
       </div>
+
+      {tab === "Hero slider" && (
+        <Editor title="Hero slides" rows={rows("slides")} head={["Image", "Slide", "Button", "Status"]} onMove={move("slides")}
+          cells={(r) => [r.img ? <Image key="i" src={String(r.img)} alt="" width={96} height={54} className="h-14 w-24 rounded object-cover" unoptimized /> : "—", <span key="t"><b>{String(r.title)}</b><span className="block max-w-sm text-xs text-slate-500">{String(r.sub)}</span></span>, `${String(r.ctaLabel)} → ${String(r.ctaHref)}`, shown(r)]}
+          fields={[{ key: "title", label: "Headline", required: true, wide: true }, { key: "sub", label: "Sub-text", type: "textarea" }, { key: "ctaLabel", label: "Button label" }, { key: "ctaHref", label: "Button link", hint: "e.g. /apply or https://…" }, { key: "img", label: "Background image", type: "image", hint: "Wide photo, JPG under 800 KB" }, { key: "show", label: "Show this slide", type: "checkbox" }]}
+          blank={() => ({ id: uid(), title: "", sub: "", ctaLabel: "Learn more", ctaHref: "/", img: "", show: true })} onSave={save("slides", "hero slide")} onDelete={del("slides", "hero slide")} />
+      )}
+      {tab === "Hero slider" && <p className="mt-3 text-sm text-slate-500">Slides rotate every 6 seconds on the home page, in this order. Visitors can pause them.</p>}
+
+      {tab === "Startup showcase" && (
+        <Editor title="Showcase startups" rows={rows("showcase")} head={["Startup", "Sector", "Website", "Home page"]} onMove={move("showcase")}
+          extra={notListed.length > 0 && <Button size="sm" variant="outline" className="min-h-10" onClick={importStartups}>Import {notListed.length} from portal</Button>}
+          cells={(r) => [<span key="n"><b>{String(r.name)}</b><span className="block text-xs text-slate-500">{String(r.desc)}</span></span>, String(r.sector), r.website ? <a key="w" className="text-brand underline" href={String(r.website)} target="_blank" rel="noreferrer">{String(r.website).replace(/^https?:\/\//, "")}</a> : <Badge key="w" tone="amber">No website</Badge>,
+            <label key="s" className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" className="h-5 w-5" checked={!!r.show} onChange={(e) => update((d) => { d.cms.showcase.find((x) => x.id === r.id)!.show = e.target.checked; }, `Website: ${e.target.checked ? "showing" : "hid"} ${String(r.name)}`)} />{r.show ? "Shown" : "Hidden"}</label>]}
+          fields={[{ key: "name", label: "Startup name", required: true }, { key: "sector", label: "Sector", required: true }, { key: "stage", label: "Stage" }, { key: "year", label: "Year incubated" }, { key: "desc", label: "One-line description", required: true, wide: true }, { key: "website", label: "Website URL", hint: "Visitors who click the startup open this site", wide: true }, { key: "logo", label: "Logo", type: "image", hint: "Square PNG under 800 KB" }, { key: "show", label: "Show on home page", type: "checkbox" }]}
+          blank={() => ({ id: uid(), name: "", sector: "", stage: "", year: "", desc: "", website: "https://", logo: "", show: true })} onSave={save("showcase", "showcase startup")} onDelete={del("showcase", "showcase startup")} />
+      )}
 
       {tab === "Pop-up" && <PopupEditor key={cms.popup.version} />}
 
